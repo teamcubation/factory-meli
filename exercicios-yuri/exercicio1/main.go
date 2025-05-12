@@ -1,9 +1,11 @@
 package main
 
+import "fmt"
+
 func main() {
 	num := 15
 	soma := somaPares(num)
-	println("A soma dos números pares de 0 a", num, "é:", soma)
+	fmt.Println("A soma dos números pares de 0 a", num, "é:", soma)
 }
 
 func somaPares(n int) int {
