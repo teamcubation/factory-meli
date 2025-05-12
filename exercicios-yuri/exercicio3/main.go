@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"slices"
+	"strconv"
 )
 
 func main() {
@@ -18,8 +20,7 @@ func main() {
 
 func mdc(a, b int) (int, error) {
 	if a == 0 && b == 0 {
-		return 0, fmt.Errorf("mdc: Não foi possível encontrar o MDC entre %d e %d", a, b)
-
+		return 0, errors.New("mdc: Não foi possível encontrar o MDC entre " + strconv.Itoa(a) + " e " + strconv.Itoa(b))
 	}
 	divisoresA := divisores(a)
 	divisoresB := divisores(b)
