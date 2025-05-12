@@ -8,7 +8,7 @@ import (
 func main() {
 
 	num := 193
-	err, res := isPrimeNumber(num)
+	res, err := isPrimeNumber(num)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -16,17 +16,17 @@ func main() {
 	fmt.Println("Número", num, "é primo?", res)
 }
 
-func isPrimeNumber(number int) (error, bool) {
+func isPrimeNumber(number int) (bool, error) {
 	if number == 0 {
-		return errors.New("isPrimeNumber: número 0 não pode ser lido como número primo"), false
+		return false, errors.New("isPrimeNumber: número 0 não pode ser lido como número primo")
 	}
 	if number == 1 {
-		return nil, false
+		return false, nil
 	}
 	for i := 2; i*i <= number; i++ {
 		if number%i == 0 {
-			return nil, false
+			return false, nil
 		}
 	}
-	return nil, true
+	return true, nil
 }
