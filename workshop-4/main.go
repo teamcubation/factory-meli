@@ -366,6 +366,7 @@ func (i inMemoryDatabase) Update(updateItemRequestDto updateItemRequestDto) (upd
 	item.Status = updateItemRequestDto.Status
 
 	updatedAt := time.Now()
+	item.UpdatedAt = &updatedAt
 
 	return updateItemResponseDto{
 		ID:          item.ID,
