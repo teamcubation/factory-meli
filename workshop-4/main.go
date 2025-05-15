@@ -382,12 +382,13 @@ func (i inMemoryDatabase) Update(updateItemRequestDto updateItemRequestDto) (upd
 }
 
 func (i inMemoryDatabase) Delete(deleteRequestDto deleteRequestDto) error {
-	if _, ok := i.items[deleteRequestDto.ID]; !ok {
+	item, ok := i.items[deleteRequestDto.ID]
+	if !ok {
 		return errNotFound
 	}
 
 	deletedAt := time.Now()
-	i.items[deleteRequestDto.ID].DeletedAt = &deletedAt
+	item.DeletedAt = &deletedAt
 	return nil
 }
 
