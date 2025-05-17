@@ -20,45 +20,45 @@ Para este, está sendo criado um projeto seguindo uma arquitetura hexagonal com 
 
 ```
 07-twitter/
-    cmd/
-        server/
-            .air.toml       # Live reload
-            .env            # Variáveis de ambiente (ex. banco de dados)
-	        main.go         # Inicializar a aplicação
-	core/
-        models/             # Entidades
-	        tweet.go
-	        user.go
-		ports/              # Interfaces (repos e services/usecases)
-			repos/
-	            tweet_repository.go
-	            user_repository.go
-			services/
-				tweet_service.go
-				user_service.go
-    infra/                  # Configurações de Docker Compose
-        scripts/            # Scripts Bash do Docker Compose
-        docker-compose.yml
-    internal/
-        adapters/           # Implementações (adapters)
-            http/           # Handlers HTTP (delivery)
-                handler.go
-                router.go
-            repositories/   # Persistência de dados
-                tweet_memory.go
-                user_memory.go
-		services/           # Casos de uso (application/service layer)
-            tweet_service.go
-            user_service.go
-    test/                   # Testes unitários
-        app/
-            user_service_test.go
-            tweet_service_test.go
-	.gitignore
-    go.mod
-    go.sum
-    README.md
-    twitter-TQ.pdf          # Requisitos do projeto
+  cmd/
+    server/
+      .air.toml         # Live reload
+      .env              # Variáveis de ambiente (ex. banco de dados)
+      main.go           # Inicializar a aplicação
+  core/
+    models/             # Entidades
+      tweet.go
+      user.go
+    ports/              # Interfaces (repos e services/usecases)
+      repos/
+        tweet_repository.go
+        user_repository.go
+      services/
+        tweet_service.go
+        user_service.go
+  infra/                # Configurações de Docker Compose
+    scripts/            # Scripts Bash do Docker Compose
+    docker-compose.yml
+  internal/
+    adapters/           # Implementações (adapters)
+      http/             # Handlers HTTP (delivery)
+        handler.go
+        router.go
+      repositories/     # Persistência de dados
+        tweet_memory.go
+        user_memory.go
+    services/           # Casos de uso (application/service layer)
+      tweet_service.go
+      user_service.go
+  test/                 # Testes unitários
+    app/
+      user_service_test.go
+      tweet_service_test.go
+  .gitignore
+  go.mod
+  go.sum
+  README.md
+  twitter-TQ.pdf        # Requisitos do projeto
 ```
 
 **Obs**: O sub-diretório de infra foi criado utilizando como base um repo privado de um dos meus projetos pessoais
