@@ -1,0 +1,42 @@
+package services
+
+import (
+	model "07-twitter/core/models"
+	repo "07-twitter/core/ports/repos"
+	service "07-twitter/core/ports/services"
+	"errors"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
+)
+
+// userServiceImpl é uma implementação de UserService com o UserRepository.
+type userServiceImpl struct {
+	repo repo.UserRepository
+}
+
+// NewUserService() cria uma instância singleton de UserService.
+func NewUserService(repo repo.UserRepository) service.UserService {
+	return &userServiceImpl{repo: repo}
+}
+
+var validate = validator.New()
+
+// CreateUser() cria um novo usuário.
+func (s *userServiceImpl) CreateUser(username string) (*model.User, error) {
+	newUser := model.User{
+		ID:        uuid.New(),
+		Username:  username,
+		Following: []int{},
+	}
+
+	if err := validate.Struct(newUser); err != nil {
+		return nil, errors.New("[CreateUser() - Validate User struct] - " + err.Error())
+	}
+
+	if err := s.repo.Save(&newUser); err != nil {
+		return nil, errors.New("[CreateUser() - repo.Save()] - " + err.Error())
+	}
+
+	return &newUser, nil
+}
