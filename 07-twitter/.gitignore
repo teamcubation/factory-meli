@@ -1,2 +1,7 @@
 # Arquivos temporários
 tmp/
+
+# Variáveis de ambiente
+cmd/server/.env
+.env
+infra/.env
