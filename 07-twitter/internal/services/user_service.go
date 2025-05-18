@@ -4,11 +4,14 @@ import (
 	model "07-twitter/core/models"
 	repo "07-twitter/core/ports/repos"
 	service "07-twitter/core/ports/services"
+	"database/sql"
 	"errors"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
+
+var ErrUserNotFound = errors.New("usuário não encontrado")
 
 // userServiceImpl é uma implementação de UserService com o UserRepository.
 type userServiceImpl struct {
@@ -39,4 +42,23 @@ func (s *userServiceImpl) CreateUser(username string) (*model.User, error) {
 	}
 
 	return &newUser, nil
+}
+
+// GetUserById() retorna um usuário pelo seu ID
+func (s *userServiceImpl) GetUserById(id string) (*model.User, error) {
+	idUuid, err := uuid.Parse(id)
+	if err != nil {
+		return nil, errors.New("[uuid.Parse()] - " + err.Error())
+	}
+
+	user, err := s.repo.FindById(idUuid)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrUserNotFound
+		}
+
+		return nil, errors.New("[s.repo.FindById()] - " + err.Error())
+	}
+
+	return user, nil
 }

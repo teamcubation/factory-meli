@@ -6,6 +6,7 @@ func NewRouter(handler *Handler) *gin.Engine {
 	router := gin.Default()
 
 	router.POST("/users", handler.CreateUserHandler)
+	router.GET("/users/:id", handler.GetUserById)
 
 	return router
 }

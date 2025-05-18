@@ -4,8 +4,9 @@ import (
 	model "07-twitter/core/models"
 	repo "07-twitter/core/ports/repos"
 	"database/sql"
+	"errors"
 
-	// "github.com/google/uuid"
+	"github.com/google/uuid"
 )
 
 // userRepositoryImpl é uma implementação PostgreSQL de UserRepository.
@@ -22,4 +23,24 @@ func NewUserRepository(db *sql.DB) repo.UserRepository {
 func (r *userRepositoryImpl) Save(user *model.User) error {
 	_, err := r.db.Exec(`INSERT INTO users (id, username) VALUES ($1, $2)`, user.ID.String(), user.Username)
 	return err
+}
+
+// FindById() retorna um usuário pelo seu id.
+func (r *userRepositoryImpl) FindById(id uuid.UUID) (*model.User, error) {
+	row := r.db.QueryRow(`SELECT * FROM users WHERE id=$1`, id.String())
+
+	var user model.User
+	var idStr string
+
+	if err := row.Scan(&idStr, &user.Username); err != nil {
+		return nil, errors.New("[row.Scan()] - " + err.Error())
+	}
+
+	parsedID, err := uuid.Parse(idStr)
+	if err != nil {
+		return nil, errors.New("[uuid.Parse()] - " + err.Error())
+	}
+
+	user.ID = parsedID
+	return &user, nil
 }

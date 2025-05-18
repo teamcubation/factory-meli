@@ -2,9 +2,12 @@ package http
 
 import (
 	service "07-twitter/core/ports/services"
+	"07-twitter/internal/services"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // Handler agrupa os serviços usados pelos endpoints HTTP.
@@ -40,4 +43,31 @@ func (h *Handler) CreateUserHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, newUser)
+}
+
+func (h *Handler) GetUserById(c *gin.Context) {
+	id := c.Param("id")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id é obrigatório"})
+		return
+	}
+
+	if _, err := uuid.Parse(id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id inválido"})
+		return
+	}
+
+	user, err := h.UserService.GetUserById(id)
+	if err != nil {
+		if errors.Is(err, services.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "usuário não encontrado"})
+			return
+		}
+		
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
