@@ -14,9 +14,14 @@ const MAX_PARTY_SIZE int = 6
 
 
 func (t *Trainer) AddToParty(p *Pokemon) error {
+	if p == nil {
+		return errors.New("pokemon não pode ser nulo")
+	}
+
 	if len(t.Party) >= MaxPartySize {
 		return errors.New("o time do treinador já está cheio")
 	}
+
 
 	if t.Party == nil {
 		t.Party = make([]*Pokemon, 0, MaxPartySize)
