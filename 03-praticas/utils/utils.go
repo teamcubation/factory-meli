@@ -21,7 +21,7 @@ func StringToSliceInt(numString string, hasVirgula bool) ([]int, error) {
 	for _, numStr := range numStrs {
 		num, err := strconv.Atoi(strings.TrimSpace(numStr))
 		if err != nil {
-			return []int{}, errors.New("erro ao converter " + numStr + " para número: " + err.Error() + "\n")
+return []int{}, errors.New(fmt.Sprintf("erro ao converter %s para número: %s", numStr, err.Error()))
 		}
 
 		numArray = append(numArray, num)
