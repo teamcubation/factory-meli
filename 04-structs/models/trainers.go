@@ -10,7 +10,8 @@ type Trainer struct {
 	Party []*Pokemon
 }
 
-const MaxPartySize int = 6
+const MAX_PARTY_SIZE int = 6
+
 
 func (t *Trainer) AddToParty(p *Pokemon) error {
 	if len(t.Party) >= MaxPartySize {
