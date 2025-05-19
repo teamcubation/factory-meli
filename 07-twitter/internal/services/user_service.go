@@ -30,7 +30,7 @@ func (s *userServiceImpl) CreateUser(username string) (*model.User, error) {
 	newUser := model.User{
 		ID:        uuid.New(),
 		Username:  username,
-		Following: []int{},
+		Following: []uuid.UUID{},
 	}
 
 	if err := validate.Struct(newUser); err != nil {

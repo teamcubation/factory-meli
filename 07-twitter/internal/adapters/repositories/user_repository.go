@@ -33,7 +33,7 @@ func (r *userRepositoryImpl) FindById(id uuid.UUID) (*model.User, error) {
 	var idStr string
 
 	if err := row.Scan(&idStr, &user.Username); err != nil {
-		return nil, errors.New("[row.Scan()] - " + err.Error())
+		return nil, err
 	}
 
 	parsedID, err := uuid.Parse(idStr)
@@ -41,6 +41,19 @@ func (r *userRepositoryImpl) FindById(id uuid.UUID) (*model.User, error) {
 		return nil, errors.New("[uuid.Parse()] - " + err.Error())
 	}
 
+	rows, err := r.db.Query(`SELECT follow_id FROM follows WHERE user_id = $1`, id)
+	if err != nil {
+		return nil, err
+	}
+
+	following := []uuid.UUID{}
+	for rows.Next() {
+		if err := rows.Scan(&following); err != nil {
+			return nil, err
+		}
+	}
+
+	user.Following = following
 	user.ID = parsedID
 	return &user, nil
 }

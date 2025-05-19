@@ -64,7 +64,7 @@ func (h *Handler) GetUserById(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "usuário não encontrado"})
 			return
 		}
-		
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
