@@ -31,10 +31,11 @@ func (pkdx *Pokedex) ListAll() []*Pokemon {
 }
 
 func (pkdx Pokedex) String() string {
-	pokemonStrings := ""
-	for _, v := range pkdx.Pokemons {
-		pokemonStrings += v.String() + "\n"
-	}
+	    var builder strings.Builder
+    for _, v := range pkdx.Pokemons {
+        builder.WriteString(v.String())
+        builder.WriteString("\n")
+    }
 
-	return fmt.Sprintf("Pokedex: \n Pokemons: \n %s", pokemonStrings)
+    return fmt.Sprintf("Pokedex: \n Pokemons: \n %s", builder.String())
 }

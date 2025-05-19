@@ -11,16 +11,17 @@ func StringToSliceInt(numString string, hasVirgula bool) ([]int, error) {
 	numArray := []int{}
 	var numStrs []string
 
-	if hasVirgula {
-		numStrs = strings.Split(strings.TrimSpace(numString), ",")
-	} else {
-		numStrs = strings.Split(strings.TrimSpace(numString), "")
-	}
+	    switch {
+    case hasVirgula:
+        numStrs = strings.Split(strings.TrimSpace(numString), ",")
+    default:
+        numStrs = strings.Split(strings.TrimSpace(numString), "")
+    }
 
 	for _, numStr := range numStrs {
 		num, err := strconv.Atoi(strings.TrimSpace(numStr))
 		if err != nil {
-			return []int{}, errors.New("erro ao converter " + numStr + " para número: " + err.Error() + "\n")
+return []int{}, errors.New(fmt.Sprintf("erro ao converter %s para número: %s", numStr, err.Error()))
 		}
 
 		numArray = append(numArray, num)
