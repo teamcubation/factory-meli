@@ -11,11 +11,12 @@ func StringToSliceInt(numString string, hasVirgula bool) ([]int, error) {
 	numArray := []int{}
 	var numStrs []string
 
-	if hasVirgula {
-		numStrs = strings.Split(strings.TrimSpace(numString), ",")
-	} else {
-		numStrs = strings.Split(strings.TrimSpace(numString), "")
-	}
+	    switch {
+    case hasVirgula:
+        numStrs = strings.Split(strings.TrimSpace(numString), ",")
+    default:
+        numStrs = strings.Split(strings.TrimSpace(numString), "")
+    }
 
 	for _, numStr := range numStrs {
 		num, err := strconv.Atoi(strings.TrimSpace(numStr))
