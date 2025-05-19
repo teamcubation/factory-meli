@@ -23,7 +23,7 @@ Para este, está sendo criado um projeto seguindo uma arquitetura hexagonal com 
   cmd/
     server/
       .air.toml         # Live reload
-      .env              # Variáveis de ambiente (ex. banco de dados)
+      Dockerfile
       main.go           # Inicializar a aplicação
   core/
     models/             # Entidades
@@ -37,7 +37,12 @@ Para este, está sendo criado um projeto seguindo uma arquitetura hexagonal com 
         tweet_service.go
         user_service.go
   infra/                # Configurações de Docker Compose
+    db/                 # Inicialização do BD
+      init.sql
     scripts/            # Scripts Bash do Docker Compose
+      down.sh           # Derrubar e limpar containers
+      up.sh             # Subir novo container e inicializar BD
+    .env                # Variáveis de ambiente (ex. banco de dados)
     docker-compose.yml
   internal/
     adapters/           # Implementações (adapters)
@@ -79,7 +84,7 @@ cd factory-meli/07-twitter
 
 2. **Configure as variáveis de ambiente:**
 
-Edite o arquivo `.env` que está no caminho `cmd/server/`.
+Adicione um arquivo `.env` dentro do caminho `infra/`.
 Como exemplo, pode utilizar os seguintes dados (ajuste se necessário):
 
 ```
@@ -100,8 +105,9 @@ cd infra
 chmod +x scripts/*.sh
 ```
 
-4. **Suba o banco de dados com Docker Compose:**
+4. **Suba os container dos serviços com Docker Compose:**
 
+Criará um container do serviço de banco de dados e outro da API go.
 Execute o bash de up contido na pasta `scripts/`:
 
 ```bash
@@ -110,10 +116,16 @@ Execute o bash de up contido na pasta `scripts/`:
 
 Caso houver sucesso ou erro, será impresso no terminal.
 
-Mas se quiser, pode verifique se o container está rodando:
+Mas se quiser, pode verifique se os containeres estão rodando:
 
 ```bash
-docker ps
+docker ps -a
+```
+
+Se houve algum erro desconhecido, pode consultar o log executando:
+
+```bash
+docker logs <nome_container>
 ```
 
 5. **(Opcional) Acesse o banco de dados via terminal:**
@@ -121,10 +133,12 @@ docker ps
 Caso tenha alterado os dados do arquivo `.env`, então aqui também deve ser atualizado:
 
 ```bash
-docker exec -it twitter-test-db psql -U urubu100 -d twitterTest
+docker exec -it twitter-db psql -U urubu100 -d twitterTest
 ```
 
-6. **Execute a aplicação Go com o Air:**
+6. **(Opcional) Execute a aplicação Go com o Air:**
+
+A aplicação Go já será inicializada como um container Docker, porém você pode retirar o trecho referente ao serviço de API de dentro do docker-compose e inicializar localmente e manualmente.
 
 Abra outro terminal na raiz do projeto (`07-twitter`) e execute:
 
@@ -142,6 +156,14 @@ Sucesso ao se conectar com o Banco de Dados!
 7. **Parar e remover os containers:**
 
 Para parar e remover os containers do banco, execute o seguinte dentro do terminal WSL:
+
+- Para parar containers específicos, passe o nome deles:
+
+```bash
+./scripts/down.sh <container1> <container2>
+```
+
+- Para parar todos os containers:
 
 ```bash
 ./scripts/down.sh
