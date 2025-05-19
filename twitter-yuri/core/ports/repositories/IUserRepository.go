@@ -1,0 +1,8 @@
+package repositories
+
+import "Yuri/twitter/core/models"
+
+type IUserRepository interface {
+	SaveUser(user *models.User) error
+	UpdateUser(user *models.User) error
+}
