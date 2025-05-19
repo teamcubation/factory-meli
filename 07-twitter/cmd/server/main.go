@@ -45,7 +45,7 @@ func main() {
 }
 
 func carregarVariaveisAmbiente() (host, port, user, password, dbname string) {
-	_ = godotenv.Load()
+	_ = godotenv.Load("../../infra/.env")
 
 	host = os.Getenv("POSTGRES_HOST")
 	port = os.Getenv("POSTGRES_PORT")
