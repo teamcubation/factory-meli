@@ -2,16 +2,23 @@ package db
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 func Connect() (*mongo.Client, error) {
-	uri := "mongodb+srv://yuripadlipskas:teste123@cluster-twitter.elatoly.mongodb.net/?retryWrites=true&w=majority&appName=cluster-twitter"
-
+	err := godotenv.Load(".env")
+	if err != nil {
+		return nil, err
+	}
+	uri := fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=%s", os.Getenv("MONGO_USERNAME"), os.Getenv("MONGO_PASSWORD"), os.Getenv("MONGO_HOST"), os.Getenv("MONGO_APP_NAME"))
+	fmt.Println("Connecting to MongoDB at:", uri)
 	clientOptions := options.Client().ApplyURI(uri)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
