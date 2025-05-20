@@ -1,7 +1,7 @@
 package models
 
 type User struct {
-	ID          string `bson:"-" json:"id"`
+	ID          string
 	Name        string
 	FollowUsers []string
 }

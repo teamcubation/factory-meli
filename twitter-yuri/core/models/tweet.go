@@ -1,7 +1,7 @@
 package models
 
 type Tweet struct {
-	ID          string `bson:"-" json:"id"`
+	ID          string
 	Title       string
 	Description string
 	Author      User
