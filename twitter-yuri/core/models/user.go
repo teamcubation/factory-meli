@@ -1,7 +1,7 @@
 package models
 
 type User struct {
-	ID          int
+	ID          string
 	Name        string
-	FollowUsers []int
+	FollowUsers []string
 }

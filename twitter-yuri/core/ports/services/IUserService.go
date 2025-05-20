@@ -1,9 +1,11 @@
 package services
 
-import "Yuri/twitter/dtos/request"
+import (
+	"Yuri/twitter/core/models"
+)
 
 type IUserService interface {
-	CreateUser(user *request.CreateUserRequestDTO) error
+	CreateUser(user *models.User) error
 	FollowUser(idUser, id int) error
 	UnfollowUser(idUser, id int) error
 }
