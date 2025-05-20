@@ -1,9 +1,9 @@
 package user
 
 import (
+	"Yuri/twitter/core/models"
 	"Yuri/twitter/core/ports/repositories"
 	"Yuri/twitter/core/ports/services"
-	"Yuri/twitter/dtos/request"
 )
 
 type ServiceImpl struct {
@@ -18,7 +18,11 @@ func NewUserService(repo repositories.IUserRepository) services.IUserService {
 	}
 }
 
-func (s *ServiceImpl) CreateUser(*request.CreateUserRequestDTO) error {
+func (s *ServiceImpl) CreateUser(user *models.User) error {
+	err := s.repo.SaveUser(user)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

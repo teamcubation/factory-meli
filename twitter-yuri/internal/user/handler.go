@@ -2,7 +2,7 @@ package user
 
 import (
 	"Yuri/twitter/core/ports/services"
-	"Yuri/twitter/dtos/request"
+	"Yuri/twitter/internal/user/handler/dtos"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +13,12 @@ type Handler struct {
 }
 
 func (h *Handler) CreateUser(c *gin.Context) {
-	var req request.CreateUserRequestDTO
+	var req dtos.CreateUserRequestDTO
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "JSON inválido"})
 		return
 	}
-	err := h.Service.CreateUser(&req)
+	err := h.Service.CreateUser(dtos.ToModel(&req))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
