@@ -21,6 +21,13 @@ type PostgresTweetRepository struct {
 	db *sql.DB
 }
 
+// NewPostgresTweetRepository creates a new PostgreSQL user repository
+func NewPostgresTweetRepository(db *sql.DB) TweetRepository {
+	return &PostgresTweetRepository{
+		db: db,
+	}
+}
+
 // Save inserts a new tweet into the database
 type TweetSaveParams struct {
 	Post string `json:"post"`
@@ -79,15 +86,22 @@ func (r *PostgresTweetRepository) FindByID(ctx context.Context, params TweetFind
 
 type TweetFindAllTweetsByUserId struct {
 	CreatorID uuid.UUID `json:"creator_id"`
+	Limit int `json:"limit"`
+	Offset int `json:"offset"`
 }
 
 func (r *PostgresTweetRepository) FindAllTweetsByUserId(ctx context.Context, params TweetFindAllTweetsByUserId) ([]*models.Tweet, error) {
-	slog.InfoContext(ctx, "Finding all tweets of an user by his id", "creator_id", params.CreatorID)
-	query := `SELECT id, created_at, updated_at, post, creator_id FROM tweets WHERE creator_id = $1;`
+	slog.InfoContext(ctx, "Finding all tweets of a user by their id", "creator_id", params.CreatorID)
 
-	rows, err := r.db.QueryContext(ctx, query, params.CreatorID)
+	query := `
+		SELECT id, created_at, updated_at, post, creator_id
+			FROM tweets WHERE creator_id = $1
+				ORDER BY created_at DESC LIMIT $2 OFFSET $3;
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, params.CreatorID, params.Limit, params.Offset)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error querying db to find all tweets of an user", "error", err, "creator_id", params.CreatorID)
+		slog.ErrorContext(ctx, "Error querying db to find all tweets of a user", "error", err, "creator_id", params.CreatorID)
 		return nil, err
 	}
 	defer rows.Close()

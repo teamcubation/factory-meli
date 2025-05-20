@@ -22,7 +22,6 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
-	ApiKey    string    `json:"api_key"`
 }
 
 func (h UserHandlers) CreateUser(w http.ResponseWriter, r *http.Request) {
