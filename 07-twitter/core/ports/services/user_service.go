@@ -2,6 +2,8 @@ package services
 
 import (
 	userModel "07-twitter/core/models"
+
+	"github.com/google/uuid"
 )
 
 // UserService define os casos de uso relacionados a usuários.
@@ -11,4 +13,7 @@ type UserService interface {
 
 	// GetUserById() retorna um usuário pelo seu ID.
 	GetUserById(id string) (*userModel.User, error)
+
+	// Following() faz um usuário com userId seguir outro usuário com followingId
+	Following(userId, followingId uuid.UUID) error
 }

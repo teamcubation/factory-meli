@@ -4,6 +4,8 @@ import (
 	model "07-twitter/core/models"
 	repo "07-twitter/core/ports/repos"
 	service "07-twitter/core/ports/services"
+	utils "07-twitter/internal/utils"
+
 	"database/sql"
 	"errors"
 
@@ -46,9 +48,9 @@ func (s *userServiceImpl) CreateUser(username string) (*model.User, error) {
 
 // GetUserById() retorna um usuário pelo seu ID
 func (s *userServiceImpl) GetUserById(id string) (*model.User, error) {
-	idUuid, err := uuid.Parse(id)
+	idUuid, err := utils.ParseStringToUuid(id)
 	if err != nil {
-		return nil, errors.New("[uuid.Parse()] - " + err.Error())
+		return nil, err
 	}
 
 	user, err := s.repo.FindById(idUuid)
@@ -61,4 +63,13 @@ func (s *userServiceImpl) GetUserById(id string) (*model.User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *userServiceImpl) Following(userId, followingId uuid.UUID) error {
+	erro := s.repo.Follow(userId, followingId)
+	if erro != nil {
+		return erro
+	}
+
+	return nil
 }

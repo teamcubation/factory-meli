@@ -59,3 +59,9 @@ func (r *userRepositoryImpl) FindById(id uuid.UUID) (*model.User, error) {
 	user.ID = parsedID
 	return &user, nil
 }
+
+func (r *userRepositoryImpl) Follow(userId, followingId uuid.UUID) error {
+	_, err := r.db.Exec(`INSERT INTO follows (user_id, follow_id) VALUES ($1, $2)`, userId, followingId)
+
+	return err
+}

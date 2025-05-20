@@ -13,4 +13,7 @@ type UserRepository interface {
 
 	// FindById() buscar um usuário pelo seu ID.
 	FindById(id uuid.UUID) (*model.User, error)
+
+	// Follow() faz com que o usuário com userId siga o usuário followId.
+	Follow(userId, followingId uuid.UUID) error
 }
