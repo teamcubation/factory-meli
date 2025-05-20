@@ -1,0 +1,10 @@
+version: '1.0'
+
+services:
+  app:
+    build: .
+    container_name: twitter-v1
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
