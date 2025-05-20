@@ -8,7 +8,8 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"github.com/twitter-tq/vinofsteel/internal/ports/output/postgres"
+	"github.com/twitter-tq/vinofsteel/core/ports/output/postgres"
+	"github.com/twitter-tq/vinofsteel/internal/services"
 	"github.com/twitter-tq/vinofsteel/pkg/logging"
 )
 
@@ -32,7 +33,7 @@ func main() {
 	// Setting up db
 	dbProvider := postgres.NewPostgresDatabaseProvider()
 	defer dbProvider.Close()
-	_, err := dbProvider.GetConnection(ctx)
+	db, err := dbProvider.GetConnection(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting SQL connection", "error", err)
 		os.Exit(1)
@@ -41,5 +42,6 @@ func main() {
 	log.Println("everything alright")
 
 	// Creating model repos
-	// userRepo := postgres.NewPostgresUserRepository(db)
+	userRepo := postgres.NewPostgresUserRepository(db)
+	_ = services.NewUserService(userRepo)
 }

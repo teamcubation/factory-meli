@@ -18,7 +18,7 @@ func SetupLogger(ctx context.Context) {
 	logsDir := "logs"
 	// #nosec G301
 	if err := os.MkdirAll(logsDir, 0755); err != nil {
-		fmt.Printf("Error creating logs directory: %v\n", err)
+		slog.ErrorContext(ctx, "Error creating logs directory", "error", err)
 		os.Exit(1)
 	}
 
@@ -29,7 +29,7 @@ func SetupLogger(ctx context.Context) {
 	// #nosec G304 G302
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		fmt.Printf("Error opening log file: %v\n", err)
+		slog.ErrorContext(ctx, "Error opening log file", "error", err)
 		os.Exit(1)
 	}
 
@@ -69,7 +69,7 @@ func SetupLogger(ctx context.Context) {
 	slog.SetDefault(logger)
 
 	// Log the initial configuration
-	logger.InfoContext(ctx, "Logger initialized",
+	slog.InfoContext(ctx, "Logger initialized",
 		"environment", env,
 		"level", logger.Handler().Enabled(ctx, slog.LevelInfo),
 		"logFile", logFilePath,
