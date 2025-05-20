@@ -1,8 +1,8 @@
-package tweet
+package repositories
 
 import (
 	"Yuri/twitter/core/models"
-	"Yuri/twitter/db"
+	"Yuri/twitter/infrastructure/db/mongo"
 	"context"
 )
 
@@ -13,7 +13,7 @@ func NewTweetRepo() *TweetRepositoryImpl {
 }
 
 func (t *TweetRepositoryImpl) SaveTweet(user *models.Tweet) error {
-	collection, err := db.ConnectToCollection("tweets")
+	collection, err := mongo.ConnectToCollection("tweets")
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func (t *TweetRepositoryImpl) SaveTweet(user *models.Tweet) error {
 }
 
 func (t *TweetRepositoryImpl) FindAllByUser(id int) ([]*models.Tweet, error) {
-	collection, err := db.ConnectToCollection("tweets")
+	collection, err := mongo.ConnectToCollection("tweets")
 	if err != nil {
 		return nil, err
 	}

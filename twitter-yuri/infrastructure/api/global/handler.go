@@ -2,20 +2,19 @@ package global
 
 import (
 	"Yuri/twitter/core/ports/services"
-	"Yuri/twitter/internal/tweet"
-	"Yuri/twitter/internal/user"
+	"Yuri/twitter/infrastructure/api/handlers"
 
 	"github.com/gin-gonic/gin"
 )
 
 type GlobalHandler struct {
-	UserHandler  *user.Handler
-	TweetHandler *tweet.Handler
+	UserHandler  *handlers.UserHandler
+	TweetHandler *handlers.TweetHandler
 }
 
 func NewRouters(userService services.IUserService, tweetService services.ITweetService) *gin.Engine {
-	userHandler := &user.Handler{Service: userService}
-	tweetHandler := &tweet.Handler{Service: tweetService}
+	userHandler := &handlers.UserHandler{Service: userService}
+	tweetHandler := &handlers.TweetHandler{Service: tweetService}
 
 	router := gin.Default()
 

@@ -1,18 +1,18 @@
-package tweet
+package handlers
 
 import (
+	"Yuri/twitter/application/tweet/dtos"
 	"Yuri/twitter/core/ports/services"
-	"Yuri/twitter/internal/tweet/handler/dtos"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct {
+type TweetHandler struct {
 	Service services.ITweetService
 }
 
-func (h *Handler) CreateTweet(c *gin.Context) {
+func (h *TweetHandler) CreateTweet(c *gin.Context) {
 	var req dtos.CreateTweetDTORequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "JSON inválido"})

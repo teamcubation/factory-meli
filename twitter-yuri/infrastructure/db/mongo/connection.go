@@ -1,4 +1,4 @@
-package db
+package mongo
 
 import (
 	"context"
@@ -13,12 +13,16 @@ import (
 )
 
 func Connect() (*mongo.Client, error) {
-	err := godotenv.Load(".env")
+	err := godotenv.Load("../.env")
 	if err != nil {
 		return nil, err
 	}
-	uri := fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=%s", os.Getenv("MONGO_USERNAME"), os.Getenv("MONGO_PASSWORD"), os.Getenv("MONGO_HOST"), os.Getenv("MONGO_APP_NAME"))
-	fmt.Println("Connecting to MongoDB at:", uri)
+	uri := fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=%s",
+		os.Getenv("MONGO_USERNAME"),
+		os.Getenv("MONGO_PASSWORD"),
+		os.Getenv("MONGO_HOST"),
+		os.Getenv("MONGO_APP_NAME"),
+	)
 	clientOptions := options.Client().ApplyURI(uri)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -27,11 +31,6 @@ func Connect() (*mongo.Client, error) {
 	if err != nil {
 		return client, err
 	}
-	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
-			return
-		}
-	}()
 
 	if err := client.Ping(ctx, readpref.Primary()); err != nil {
 		return client, err
@@ -44,6 +43,7 @@ func Connect() (*mongo.Client, error) {
 func ConnectToDatabase() (*mongo.Database, error) {
 	client, err := Connect()
 	if err != nil {
+		fmt.Println("Error connecting to MongoDB:", err)
 		return nil, err
 	}
 
@@ -54,9 +54,22 @@ func ConnectToDatabase() (*mongo.Database, error) {
 func ConnectToCollection(collectionName string) (*mongo.Collection, error) {
 	database, err := ConnectToDatabase()
 	if err != nil {
+		fmt.Println("Error connecting to database:", err)
 		return nil, err
 	}
 
 	collection := database.Collection(collectionName)
 	return collection, nil
+}
+
+func Disconnect(client *mongo.Client) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err := client.Disconnect(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Disconnected from MongoDB")
+	return nil
 }

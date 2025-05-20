@@ -6,22 +6,22 @@ import (
 	"Yuri/twitter/core/ports/services"
 )
 
-type ServiceImpl struct {
+type TweetServiceImpl struct {
 	repo   repositories.ITweetRepository
 	nextID int
 }
 
 func NewTweetService(repo repositories.ITweetRepository) services.ITweetService {
-	return &ServiceImpl{
+	return &TweetServiceImpl{
 		repo:   repo,
 		nextID: 1,
 	}
 }
 
-func (s *ServiceImpl) CreateTweet(tweet *models.Tweet) error {
+func (s *TweetServiceImpl) CreateTweet(tweet *models.Tweet) error {
 	panic("unimplemented")
 }
 
-func (s *ServiceImpl) ListTweetsByUserID(id int) ([]*models.Tweet, error) {
+func (s *TweetServiceImpl) ListTweetsByUserID(id int) ([]*models.Tweet, error) {
 	panic("unimplemented")
 }
