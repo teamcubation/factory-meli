@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/twitter-tq/vinofsteel/core/domain/models"
 	"github.com/twitter-tq/vinofsteel/core/ports/output/postgres"
@@ -23,6 +24,7 @@ func NewUserService(repo postgres.UserRepository) UserServiceImpl {
 
 func (s *UserServiceImpl) CreateUser(ctx context.Context, email string) (*models.User, error) {
 	// Validating email
+	email = strings.TrimSpace(email)
 	var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 
 	if email == "" {

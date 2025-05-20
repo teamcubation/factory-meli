@@ -71,6 +71,7 @@ func (r *PostgresUserRepository) FindByEmail(ctx context.Context, params UserFin
 		&user.Email,
 	)
 	if err != nil {
+		slog.ErrorContext(ctx, "Error saving getting user from db by email", "error", err, "email", params.Email)
 		return nil, err
 	}
 
