@@ -2,16 +2,16 @@ package user
 
 import (
 	"Yuri/twitter/core/models"
-	"Yuri/twitter/core/ports/repositories"
+	"Yuri/twitter/core/ports/out"
 	"Yuri/twitter/core/ports/services"
 	"fmt"
 )
 
 type UserServiceImpl struct {
-	repo repositories.IUserRepository
+	repo out.IUserRepository
 }
 
-func NewUserService(repo repositories.IUserRepository) services.IUserService {
+func NewUserService(repo out.IUserRepository) services.IUserService {
 	return &UserServiceImpl{
 		repo: repo,
 	}

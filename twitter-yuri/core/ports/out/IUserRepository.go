@@ -1,4 +1,4 @@
-package repositories
+package out
 
 import "Yuri/twitter/core/models"
 
