@@ -1,9 +1,7 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
-
 type Tweet struct {
-	ID          primitive.ObjectID
+	ID          string `bson:"-" json:"id"`
 	Title       string
 	Description string
 	Author      User
