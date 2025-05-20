@@ -21,13 +21,13 @@ func NewUserRepository(db *sql.DB) repo.UserRepository {
 
 // Save armazena um usuário no banco de dados.
 func (r *userRepositoryImpl) Save(user *model.User) error {
-	_, err := r.db.Exec(`INSERT INTO users (id, username) VALUES ($1, $2)`, user.ID.String(), user.Username)
+	_, err := r.db.Exec(`INSERT INTO users (id, username) VALUES ($1, $2)`, user.ID, user.Username)
 	return err
 }
 
 // FindById() retorna um usuário pelo seu id.
 func (r *userRepositoryImpl) FindById(id uuid.UUID) (*model.User, error) {
-	row := r.db.QueryRow(`SELECT * FROM users WHERE id=$1`, id.String())
+	row := r.db.QueryRow(`SELECT * FROM users WHERE id=$1`, id)
 
 	var user model.User
 	var idStr string
@@ -48,9 +48,11 @@ func (r *userRepositoryImpl) FindById(id uuid.UUID) (*model.User, error) {
 
 	following := []uuid.UUID{}
 	for rows.Next() {
-		if err := rows.Scan(&following); err != nil {
+		var followID uuid.UUID
+		if err := rows.Scan(&followID); err != nil {
 			return nil, err
 		}
+		following = append(following, followID)
 	}
 
 	user.Following = following
