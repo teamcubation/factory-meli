@@ -33,7 +33,7 @@ fi
 if [ "$ENV" = "production" ]; then
   # We only run migrations automatically on prod, so that we can write migrations without them running on every reload in development
   echo "Running migrations to $PGDATABASE db..."
-  goose -dir internal/database/migrations postgres "$PG_CONN_STRING" up
+  goose -dir internal/ports/output/postgres/migrations postgres "$PG_CONN_STRING" up
 
   make build && exec ./cmd/http/twitter
 else
@@ -75,7 +75,7 @@ fi
 if [ "$ENV" = "production" ]; then
   # We only run migrations automatically on prod, so that we can write migrations without them running on every reload in development
   echo "Running migrations to $PGDATABASE db..."
-  goose -dir internal/database/migrations postgres "$PG_CONN_STRING" up
+  goose -dir internal/ports/output/postgres/migrations postgres "$PG_CONN_STRING" up
 
   make build && exec ./luso-wiki
 else
