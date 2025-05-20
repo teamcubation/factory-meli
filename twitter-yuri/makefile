@@ -2,7 +2,7 @@
 DOCKER_COMPOSE = docker compose
 
 # PHONY targets
-.PHONY: up down logs clean help
+.PHONY: up-dev down logs clean help
 
 up:
 	$(DOCKER_COMPOSE) up -d
@@ -19,7 +19,7 @@ clean:
 help:
 	@echo "Comandos disponíveis:"
 	@echo "  make up     	 - Inicia os containers"
-	@echo "  make down   	 - Para os containers
+	@echo "  make down   	 - Para os containers"
 	@echo "  make logs       - Mostra logs dos containers"
 	@echo "  make clean      - Remove containers, volumes e cache"
 	@echo "  make help       - Mostra esta mensagem de ajuda"
