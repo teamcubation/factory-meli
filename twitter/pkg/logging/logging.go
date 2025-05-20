@@ -16,7 +16,6 @@ func SetupLogger(ctx context.Context) {
 
 	// Create logs directory if it doesn't exist
 	logsDir := "logs"
-	// #nosec G301
 	if err := os.MkdirAll(logsDir, 0755); err != nil {
 		slog.ErrorContext(ctx, "Error creating logs directory", "error", err)
 		os.Exit(1)
@@ -26,7 +25,6 @@ func SetupLogger(ctx context.Context) {
 	timestamp := time.Now().Format("2006-01-02")
 	logFilePath := filepath.Join(logsDir, fmt.Sprintf("%s.log", timestamp))
 
-	// #nosec G304 G302
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error opening log file", "error", err)

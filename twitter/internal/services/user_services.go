@@ -2,6 +2,10 @@ package services
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"regexp"
 
 	"github.com/twitter-tq/vinofsteel/core/domain/models"
 	"github.com/twitter-tq/vinofsteel/core/ports/output/postgres"
@@ -18,18 +22,30 @@ func NewUserService(repo postgres.UserRepository) UserServiceImpl {
 }
 
 func (s *UserServiceImpl) CreateUser(ctx context.Context, email string) (*models.User, error) {
-	user, err := s.repository.Save(ctx, postgres.UserSaveParams{
+	// Validating email
+	var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+
+	if email == "" {
+		return nil, fmt.Errorf("email is an obligatory field")
+	}
+
+	if !emailRegex.MatchString(email) {
+		return nil, fmt.Errorf("invalid email format")
+	}
+
+	// Verifying if the user email already has an account associated to it
+	user, err := s.repository.FindByEmail(ctx, postgres.UserFindByEmailParams{
 		Email: email,
 	})
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
 
-	return user, nil
-}
+	if user != nil {
+		return nil, errors.New("there already exists an user with this email")
+	}
 
-func (s *UserServiceImpl) ListUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	user, err := s.repository.FindByEmail(ctx, postgres.UserFindByEmailParams{
+	user, err = s.repository.Save(ctx, postgres.UserSaveParams{
 		Email: email,
 	})
 	if err != nil {

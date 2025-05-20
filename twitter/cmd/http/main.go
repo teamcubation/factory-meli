@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"log"
 	"log/slog"
 	"os"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/twitter-tq/vinofsteel/core/ports/output/postgres"
+	"github.com/twitter-tq/vinofsteel/internal/adapter/http"
 	"github.com/twitter-tq/vinofsteel/internal/services"
 	"github.com/twitter-tq/vinofsteel/pkg/logging"
 )
@@ -21,7 +21,7 @@ func main() {
 
 	// Initializing environment variables
 	if os.Getenv("ENV") != "production" {
-		if err := godotenv.Load("../../.env"); err != nil {
+		if err := godotenv.Load(); err != nil {
 			slog.ErrorContext(ctx, "Error loading .env file", "error", err)
 			os.Exit(1)
 		}
@@ -39,9 +39,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Println("everything alright")
-
-	// Creating model repos
+	// Creating model services
 	userRepo := postgres.NewPostgresUserRepository(db)
-	_ = services.NewUserService(userRepo)
+	userService := services.NewUserService(userRepo)
+
+	router := http.NewRouter(http.NewRouterParams{
+		UserService: userService,
+	})
+	router.Run(ctx, ":3000")
 }

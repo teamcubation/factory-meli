@@ -37,8 +37,7 @@ if [ "$ENV" = "production" ]; then
 
   make build && exec ./cmd/http/twitter
 else
-  cd cmd/http
-  exec air
+  exec make
 fi
 
 #!/bin/sh
@@ -77,8 +76,8 @@ if [ "$ENV" = "production" ]; then
   echo "Running migrations to $PGDATABASE db..."
   goose -dir internal/ports/output/postgres/migrations postgres "$PG_CONN_STRING" up
 
-  make build && exec ./luso-wiki
+  make build && exec ./cmd/http/twitter
 else
-  exec air
+  exec make
 fi
 

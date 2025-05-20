@@ -1,5 +1,4 @@
-![tests ci badge](https://github.com/fundacao-lusofona/luso-wiki/actions/workflows/ci.yml/badge.svg)
-# Luso Wiki (Aberto a sugestões para nomes)
+# Twitter
 
 ## Tecnologias utilizadas:
 - [Go](https://go.dev/) `v1.23.4`

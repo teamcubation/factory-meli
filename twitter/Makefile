@@ -29,9 +29,9 @@ build: vendor
 	go build -mod=vendor -o ./cmd/http/twitter ./cmd/http
 .PHONY: build
 
-# Run using Air, assumes .air.toml is configured for ./cmd/http
+# Run using Air
 run:
-	cd cmd/http && air
+	air
 .PHONY: run
 
 test:
