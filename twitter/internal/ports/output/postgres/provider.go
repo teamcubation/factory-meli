@@ -25,7 +25,6 @@ func NewPostgresDatabaseProvider() database.SQLProvider {
 	)
 }
 
-
 func (p *PostgresProvider) GetConnection(ctx context.Context) (*sql.DB, error) {
 	if p.db != nil {
 		if err := p.db.PingContext(ctx); err != nil {

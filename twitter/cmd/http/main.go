@@ -9,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/twitter-tq/vinofsteel/internal/ports/output/postgres"
+	"github.com/twitter-tq/vinofsteel/pkg/logging"
 )
 
 func main() {
@@ -24,6 +25,9 @@ func main() {
 			os.Exit(1)
 		}
 	}
+
+	// Setting up logging
+	logging.SetupLogger(ctx)
 
 	// Setting up db
 	dbProvider := postgres.NewPostgresDatabaseProvider()
