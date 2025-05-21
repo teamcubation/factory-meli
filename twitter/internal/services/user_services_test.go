@@ -21,7 +21,6 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-// FindByEmail mocks the FindByEmail method
 func (m *MockUserRepository) FindByEmail(ctx context.Context, params postgres.UserFindByEmailParams) (*models.User, error) {
 	args := m.Called(ctx, params)
 	
@@ -32,7 +31,6 @@ func (m *MockUserRepository) FindByEmail(ctx context.Context, params postgres.Us
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
-// FindByID mocks the FindByID method
 func (m *MockUserRepository) FindByID(ctx context.Context, params postgres.UserFindByIDParams) (*models.User, error) {
 	args := m.Called(ctx, params)
 	
@@ -43,7 +41,6 @@ func (m *MockUserRepository) FindByID(ctx context.Context, params postgres.UserF
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
-// Save mocks the Save method
 func (m *MockUserRepository) Save(ctx context.Context, params postgres.UserSaveParams) (*models.User, error) {
 	args := m.Called(ctx, params)
 	
@@ -54,7 +51,6 @@ func (m *MockUserRepository) Save(ctx context.Context, params postgres.UserSaveP
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
-// GetTimeline mocks the GetTimeline method
 func (m *MockUserRepository) GetTimeline(ctx context.Context, params postgres.TimelineParams) ([]*models.UserWithTweets, error) {
 	args := m.Called(ctx, params)
 	
@@ -65,6 +61,7 @@ func (m *MockUserRepository) GetTimeline(ctx context.Context, params postgres.Ti
 	return args.Get(0).([]*models.UserWithTweets), args.Error(1)
 }
 
+// Test scenarios
 func TestCreateUser(t *testing.T) {
 	// Test cases
 	tests := []struct {
@@ -151,23 +148,15 @@ func TestCreateUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Signal the test to be run in parallel
 			t.Parallel()
 
-			// Create mock repository
 			mockRepo := new(MockUserRepository)
-			
-			// Setup the mock expectations
 			tt.mockSetup(mockRepo)
-			
-			// Create service with mock repository
 			service := NewUserService(mockRepo)
 			
-			// Call method with the correct data
 			req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(tt.requestBody))
 			user, err := service.CreateUser(context.Background(), req)
 			
-			// Check error expectations
 			if tt.expectedError {
 				assert.Error(t, err)
 				if svcErr, ok := err.(ServiceError); ok {
@@ -179,7 +168,6 @@ func TestCreateUser(t *testing.T) {
 				assert.NotNil(t, user)
 			}
 			
-			// Verify that all expected mock calls were made
 			mockRepo.AssertExpectations(t)
 		})
 	}

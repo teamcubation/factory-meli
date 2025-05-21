@@ -26,13 +26,7 @@ func NewTweetService(tweetRepo postgres.TweetRepository, userRepo postgres.UserR
 }
 
 func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, r *http.Request) ([]*models.Tweet, error) {	
-	// Validating parameters
-	creatorIDStr := r.PathValue("creator_id")
-	creatorID, err := uuid.Parse(creatorIDStr)
-	if err != nil {
-		return nil, ServiceError{http.StatusBadRequest, "invalid creator_id"}
-	}
-
+	// Validating parameter
 	limit := 10
 	limitStr := r.URL.Query().Get("limit")
 	if limitStr != "" {
@@ -51,6 +45,12 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, r *http.Request
 		} else {
 		return nil, ServiceError{http.StatusBadRequest, "invalid offset"}
 		}
+	}
+
+	creatorIDStr := r.PathValue("creator_id")
+	creatorID, err := uuid.Parse(creatorIDStr)
+	if err != nil {
+		return nil, ServiceError{http.StatusBadRequest, "invalid creator_id"}
 	}
 
 	_, err = s.u_repository.FindByID(ctx, postgres.UserFindByIDParams{
