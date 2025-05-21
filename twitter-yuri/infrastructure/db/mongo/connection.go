@@ -43,7 +43,6 @@ func Connect() (*mongo.Client, error) {
 func ConnectToDatabase() (*mongo.Database, error) {
 	client, err := Connect()
 	if err != nil {
-		fmt.Println("Error connecting to MongoDB:", err)
 		return nil, err
 	}
 
@@ -54,7 +53,6 @@ func ConnectToDatabase() (*mongo.Database, error) {
 func ConnectToCollection(collectionName string) (*mongo.Collection, error) {
 	database, err := ConnectToDatabase()
 	if err != nil {
-		fmt.Println("Error connecting to database:", err)
 		return nil, err
 	}
 
@@ -70,6 +68,5 @@ func Disconnect(client *mongo.Client) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Disconnected from MongoDB")
 	return nil
 }

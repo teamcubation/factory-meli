@@ -5,7 +5,6 @@ import (
 	"Yuri/twitter/infrastructure/db/mongo"
 	"Yuri/twitter/infrastructure/db/mongo/mappers"
 	"context"
-	"fmt"
 )
 
 type TweetRepositoryImpl struct{}
@@ -29,7 +28,6 @@ func (t *TweetRepositoryImpl) SaveTweet(user *models.Tweet) error {
 	}
 
 	if errDisconnect := mongo.Disconnect(collection.Database().Client()); errDisconnect != nil {
-		fmt.Println("Error disconnecting from MongoDB:", errDisconnect)
 		return errDisconnect
 	}
 	return nil
@@ -42,7 +40,6 @@ func (t *TweetRepositoryImpl) FindAllByUser(userID string) ([]*models.Tweet, err
 	}
 	cursor, err := collection.Find(context.TODO(), map[string]interface{}{"author_id": userID})
 	if err != nil {
-		fmt.Println("Error finding tweets:", err)
 		return nil, err
 	}
 	defer cursor.Close(context.TODO())
