@@ -6,6 +6,6 @@ import (
 
 type IUserService interface {
 	CreateUser(user *models.User) error
-	FollowUser(idUser, id int) error
-	UnfollowUser(idUser, id int) error
+	FollowUser(idUser, id string) error
+	UnfollowUser(idUser, id string) error
 }
