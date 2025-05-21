@@ -30,7 +30,7 @@ func NewPostgresTweetRepository(db *sql.DB) TweetRepository {
 
 // Save inserts a new tweet into the database
 type TweetSaveParams struct {
-	Post string `json:"post"`
+	Post      string    `json:"post"`
 	CreatorID uuid.UUID `json:"creator_id"`
 }
 
@@ -86,8 +86,8 @@ func (r *PostgresTweetRepository) FindByID(ctx context.Context, params TweetFind
 
 type TweetFindAllTweetsByUserId struct {
 	CreatorID uuid.UUID `json:"creator_id"`
-	Limit int `json:"limit"`
-	Offset int `json:"offset"`
+	Limit     int       `json:"limit"`
+	Offset    int       `json:"offset"`
 }
 
 func (r *PostgresTweetRepository) FindAllTweetsByUserId(ctx context.Context, params TweetFindAllTweetsByUserId) ([]*models.Tweet, error) {

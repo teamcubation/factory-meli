@@ -39,7 +39,7 @@ func (s *TweetServiceImpl) CreateTweet(ctx context.Context, post, creatorIDStr s
 	}
 
 	tweet, err := s.repository.Save(ctx, postgres.TweetSaveParams{
-		Post: post,
+		Post:      post,
 		CreatorID: creatorID,
 	})
 	if err != nil {
@@ -76,8 +76,8 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, creatorIDStr, l
 
 	tweet, err := s.repository.FindAllTweetsByUserId(ctx, postgres.TweetFindAllTweetsByUserId{
 		CreatorID: creatorID,
-		Limit: limit,
-		Offset: offset,
+		Limit:     limit,
+		Offset:    offset,
 	})
 	if err != nil {
 		return nil, err

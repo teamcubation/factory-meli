@@ -21,8 +21,8 @@ type Tweet struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Post      string `json:"post"`
-	CreatorID    uuid.UUID `json:"creator_id"`
+	Post      string    `json:"post"`
+	CreatorID uuid.UUID `json:"creator_id"`
 }
 
 func (h TweetHandlers) GetTweetsByCreator(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +74,7 @@ func modelTweetToTweet(tweet models.Tweet) Tweet {
 		ID:        tweet.ID,
 		CreatedAt: tweet.CreatedAt,
 		UpdatedAt: tweet.UpdatedAt,
-		Post:     tweet.Post,
+		Post:      tweet.Post,
 		CreatorID: tweet.CreatorID,
 	}
 }

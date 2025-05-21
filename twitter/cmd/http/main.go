@@ -42,13 +42,13 @@ func main() {
 	// Creating model services
 	userRepo := postgres.NewPostgresUserRepository(db)
 	userService := services.NewUserService(userRepo)
-	
+
 	tweetRepo := postgres.NewPostgresTweetRepository(db)
 	tweetService := services.NewTweetService(tweetRepo)
 
 	router := http.NewRouter(http.NewRouterParams{
-		UserService: userService,
+		UserService:  userService,
 		TweetService: tweetService,
 	})
-	router.Run(ctx, ":3000")
+	router.Run(ctx)
 }

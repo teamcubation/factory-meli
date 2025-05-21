@@ -13,5 +13,5 @@ type Tweet struct {
 	UpdatedAt time.Time
 	DeletedAt sql.NullTime
 	Post      string
-	CreatorID    uuid.UUID
+	CreatorID uuid.UUID
 }
