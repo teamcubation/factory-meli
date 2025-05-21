@@ -41,7 +41,12 @@ func main() {
 	userRepo := repos.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
-	router := http.NewRouter(userHandler)
+
+	tweetRepo := repos.NewTweetRepository(db)
+	tweetService := services.NewTweetService(tweetRepo, userRepo)
+	tweetHandler := handlers.NewTweetHandler(tweetService)
+
+	router := http.NewRouter(userHandler, tweetHandler)
 	router.Run(":8080")
 }
 

@@ -19,4 +19,7 @@ type UserRepository interface {
 
 	// Unfollow() faz com que o usuário com userId deixe de seguir o usuário followId.
 	Unfollow(userId, followingId uuid.UUID) error
+
+	// FindFollowingIDsByUserID() busca as pessoas que o usuário com userID segue
+	FindFollowingIDsByUserID(userID uuid.UUID) ([]uuid.UUID, error)
 }

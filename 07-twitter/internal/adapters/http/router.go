@@ -6,13 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(handler *handlers.UserHandler) *gin.Engine {
+func NewRouter(userHandler *handlers.UserHandler, tweetHandler *handlers.TweetHandler) *gin.Engine {
 	router := gin.Default()
 
-	router.POST("/users", handler.CreateUserHandler)
-	router.GET("/users/:id", handler.GetUserById)
-	router.POST("/users/follow", handler.Follow)
-	router.DELETE("/users/unfollow", handler.Unfollow)
+	router.POST("/users", userHandler.CreateUserHandler)
+	router.GET("/users/:id", userHandler.GetUserById)
+	router.POST("/users/follow", userHandler.Follow)
+	router.DELETE("/users/unfollow", userHandler.Unfollow)
+
+	router.POST("/tweet", tweetHandler.CreateTweet)
+	router.GET("/tweet/:id", tweetHandler.GetTweetsByUser)
+	router.GET("/tweet/timeline/:id", tweetHandler.GetTweetTimelineByUser)
 
 	return router
 }
