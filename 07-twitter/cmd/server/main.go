@@ -4,8 +4,9 @@ package main
 
 import (
 	http "07-twitter/internal/adapters/http"
-	"07-twitter/internal/adapters/repositories"
-	"07-twitter/internal/services"
+	handlers "07-twitter/internal/adapters/http/handlers"
+	repos "07-twitter/internal/adapters/repositories"
+	services "07-twitter/internal/services"
 	"database/sql"
 	"fmt"
 	"log"
@@ -37,10 +38,10 @@ func main() {
 
 	fmt.Println("Sucesso ao se conectar com o Banco de Dados!")
 
-	repo := repositories.NewUserRepository(db)
-	service := services.NewUserService(repo)
-	handler := http.NewHandler(service)
-	router := http.NewRouter(handler)
+	userRepo := repos.NewUserRepository(db)
+	userService := services.NewUserService(userRepo)
+	userHandler := handlers.NewUserHandler(userService)
+	router := http.NewRouter(userHandler)
 	router.Run(":8080")
 }
 

@@ -1,4 +1,4 @@
-package http
+package handlers
 
 import (
 	service "07-twitter/core/ports/services"
@@ -11,14 +11,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// Handler agrupa os serviços usados pelos endpoints HTTP.
-type Handler struct {
+// UserHandler agrupa os serviços usados pelos endpoints HTTP.
+type UserHandler struct {
 	UserService service.UserService
 }
 
 // NewHandler() cria uma nova instância de Handler.
-func NewHandler(userService service.UserService) *Handler {
-	return &Handler{
+func NewUserHandler(userService service.UserService) *UserHandler {
+	return &UserHandler{
 		UserService: userService,
 	}
 }
@@ -29,7 +29,7 @@ type createUserRequest struct {
 
 // CreateUserHandler() lida com a criação de um novo usuário.
 // @route POST /users
-func (h *Handler) CreateUserHandler(c *gin.Context) {
+func (h *UserHandler) CreateUserHandler(c *gin.Context) {
 	var req createUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -46,7 +46,7 @@ func (h *Handler) CreateUserHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, newUser)
 }
 
-func (h *Handler) GetUserById(c *gin.Context) {
+func (h *UserHandler) GetUserById(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
@@ -79,7 +79,7 @@ type followRequest struct {
 	FollowingID string `json:"following_id"`
 }
 
-func (h *Handler) Following(c *gin.Context) {
+func (h *UserHandler) Following(c *gin.Context) {
 	var req followRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {

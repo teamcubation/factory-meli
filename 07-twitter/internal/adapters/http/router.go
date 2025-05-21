@@ -1,8 +1,12 @@
 package http
 
-import "github.com/gin-gonic/gin"
+import (
+	handlers "07-twitter/internal/adapters/http/handlers"
 
-func NewRouter(handler *Handler) *gin.Engine {
+	"github.com/gin-gonic/gin"
+)
+
+func NewRouter(handler *handlers.UserHandler) *gin.Engine {
 	router := gin.Default()
 
 	router.POST("/users", handler.CreateUserHandler)
