@@ -11,7 +11,7 @@ import (
 	"github.com/twitter-tq/vinofsteel/internal/services"
 )
 
-// TweetHandler handles HTTP requests for user operations
+// TweetHandlers handles HTTP requests for tweet operations
 type TweetHandlers struct {
 	service services.TweetServiceImpl
 }

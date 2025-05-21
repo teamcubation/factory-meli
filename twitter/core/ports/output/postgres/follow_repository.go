@@ -13,6 +13,7 @@ import (
 type FollowRepository interface {
 	Save(ctx context.Context, params FollowSaveParams) (*models.Follow, error)
 	Delete(ctx context.Context, params FollowDeleteParams) error
+	FindByIds(ctx context.Context, params FollowFindByIdsParams) (*models.Follow, error)
 }
 
 // PostgresFollowRepository implements FollowRepository interface with PostgreSQL
@@ -33,21 +34,6 @@ type FollowSaveParams struct {
 
 func (r *PostgresFollowRepository) Save(ctx context.Context, params FollowSaveParams) (*models.Follow, error) {
 	slog.InfoContext(ctx, "Saving a new tweet to the database", "follower_id", params.FollowerID, "followed_id", params.FollowedID)
-
-	// // First check if the follow relationship already exists
-	// exists, err := r.Exists(ctx, params.FollowerID, params.FollowedID)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// if exists {
-	// 	return nil, errors.New("follow relationship already exists")
-	// }
-
-	// // Cannot follow yourself
-	// if params.FollowerID == params.FollowedID {
-	// 	return nil, errors.New("cannot follow yourself")
-	// }
 
 	query := `INSERT INTO follows (follower_id, followed_id) VALUES ($1, $2) RETURNING id, created_at, updated_at, follower_id, followed_id;`
 
@@ -79,6 +65,7 @@ type FollowDeleteParams struct {
 }
 
 func (r *PostgresFollowRepository) Delete(ctx context.Context, params FollowDeleteParams) error {
+	slog.InfoContext(ctx, "Deleting a follow from the database", "follower_id", params.FollowerID, "followed_id", params.FollowedID)
 	query := `UPDATE follows SET deleted_at = NOW() WHERE follower_id = $1 AND followed_id = $2 AND deleted_at IS NULL;`
 
 	result, err := r.db.ExecContext(ctx, query, params.FollowerID, params.FollowedID)
@@ -94,10 +81,36 @@ func (r *PostgresFollowRepository) Delete(ctx context.Context, params FollowDele
 	}
 
 	if rows == 0 {
+		slog.ErrorContext(ctx, "Follow relationship not found", "error", err)
 		return errors.New("follow relationship not found")
 	}
 
 	return nil
+}
+
+type FollowFindByIdsParams struct {
+	FollowerID uuid.UUID `json:"follower_id"`
+	FollowedID uuid.UUID `json:"followed_id"`
+}
+
+func (r *PostgresFollowRepository) FindByIds(ctx context.Context, params FollowFindByIdsParams) (*models.Follow, error) {
+	slog.InfoContext(ctx, "Getting a follow from the database", "follower_id", params.FollowerID, "followed_id", params.FollowedID)
+	query := `SELECT id, created_at, updated_at, follower_id, followed_id FROM follows WHERE follower_id = $1 AND followed_id = $2 AND deleted_at IS NULL;`
+	
+	var follow models.Follow
+	err := r.db.QueryRowContext(ctx, query, params.FollowerID, params.FollowedID).Scan(
+		&follow.ID,
+		&follow.CreatedAt,
+		&follow.UpdatedAt,
+		&follow.FollowerID,
+		&follow.FollowedID,
+	)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error querying row while selecting a follow", "error", err)
+		return nil, err
+	}
+	
+	return &follow, nil
 }
 
 type FollowFindFollowingParams struct {

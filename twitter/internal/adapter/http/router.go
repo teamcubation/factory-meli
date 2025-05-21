@@ -20,6 +20,7 @@ type Router struct {
 type NewRouterParams struct {
 	UserService  services.UserServiceImpl
 	TweetService services.TweetServiceImpl
+	FollowService services.FollowServiceImpl
 }
 
 func NewRouter(params NewRouterParams) *Router {
@@ -33,6 +34,10 @@ func NewRouter(params NewRouterParams) *Router {
 	tweetHandlers := TweetHandlers{params.TweetService}
 	mux.HandleFunc("POST /tweets/{creator_id}", tweetHandlers.CreateTweet)
 	mux.HandleFunc("GET /tweets/{creator_id}", tweetHandlers.GetTweetsByCreator)
+
+	// Follow routes
+	followHandlers := FollowHandlers{params.FollowService}
+	mux.HandleFunc("POST /follows/{followed_id}", followHandlers.FollowUser)
 
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),
