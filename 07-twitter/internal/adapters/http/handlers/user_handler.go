@@ -110,3 +110,38 @@ func (h *UserHandler) Follow(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Seguindo com sucesso"})
 }
+
+type unfollowRequest struct {
+	UserID      string `json:"user_id"`
+	FollowingID string `json:"following_id"`
+}
+
+func (h *UserHandler) Unfollow(c *gin.Context) {
+	var req unfollowRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "JSON inválido"})
+	}
+
+	if req.UserID == "" || req.FollowingID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id e following_id são obrigatórios"})
+		return
+	}
+
+	userIdUuid, err := utils.ParseStringToUuid(req.UserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id inválido"})
+		return
+	}
+	followingIdUuuid, err := utils.ParseStringToUuid(req.FollowingID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "following_id inválido"})
+		return
+	}
+
+	if err := h.UserService.Unfollow(userIdUuid, followingIdUuuid); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Sucesso ao deixar de seguir usuário"})
+}

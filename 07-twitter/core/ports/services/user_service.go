@@ -16,4 +16,7 @@ type UserService interface {
 
 	// Follow() faz um usuário com userId seguir outro usuário com followingId
 	Follow(userId, followingId uuid.UUID) error
+
+	// Unfollow() faz um usuário com userId deixar de seguir outro com followingId
+	Unfollow(userId, followingId uuid.UUID) error
 }

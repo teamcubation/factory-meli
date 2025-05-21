@@ -12,6 +12,7 @@ func NewRouter(handler *handlers.UserHandler) *gin.Engine {
 	router.POST("/users", handler.CreateUserHandler)
 	router.GET("/users/:id", handler.GetUserById)
 	router.POST("/users/follow", handler.Follow)
+	router.DELETE("/users/unfollow", handler.Unfollow)
 
 	return router
 }

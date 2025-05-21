@@ -65,3 +65,9 @@ func (r *userRepositoryImpl) Follow(userId, followingId uuid.UUID) error {
 
 	return err
 }
+
+func (r *userRepositoryImpl) Unfollow(userId, followingId uuid.UUID) error {
+	_, err := r.db.Exec(`DELETE FROM follows WHERE user_id = $1 AND follow_id = $2`, userId, followingId)
+
+	return err
+}

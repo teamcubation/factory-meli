@@ -16,4 +16,7 @@ type UserRepository interface {
 
 	// Follow() faz com que o usuário com userId siga o usuário followId.
 	Follow(userId, followingId uuid.UUID) error
+
+	// Unfollow() faz com que o usuário com userId deixe de seguir o usuário followId.
+	Unfollow(userId, followingId uuid.UUID) error
 }
