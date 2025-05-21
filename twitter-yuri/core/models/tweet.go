@@ -1,8 +1,11 @@
 package models
 
+import "time"
+
 type Tweet struct {
 	ID          string
 	Title       string
 	Description string
-	Author      User
+	AuthorId    string
+	CreatedAt   time.Time
 }
