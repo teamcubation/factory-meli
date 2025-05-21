@@ -1,6 +1,7 @@
 package main
 
 import (
+	timelineService "Yuri/twitter/application/timeline/service"
 	tweetService "Yuri/twitter/application/tweet/service"
 	userService "Yuri/twitter/application/user/service"
 	"Yuri/twitter/infrastructure/api/global"
@@ -8,12 +9,6 @@ import (
 )
 
 func main() {
-	// _, err := db.Connect()
-	// if err != nil {
-	// 	fmt.Println("Error connecting to MongoDB:", err)
-	// 	return
-	// }
-	// fmt.Println("Connected to MongoDB successfully")
 
 	//REPOSITORIES
 	userRepo := repos.NewUserRepo()
@@ -22,9 +17,10 @@ func main() {
 	//SERVICES
 	userSvc := userService.NewUserService(userRepo)
 	tweetSvc := tweetService.NewTweetService(tweetRepo)
+	timelineSvc := timelineService.NewTimelineService(tweetRepo, userRepo)
 
 	//ROUTERS
-	router := global.NewRouters(userSvc, tweetSvc)
+	router := global.NewRouters(userSvc, tweetSvc, timelineSvc)
 
 	router.Run(":8080")
 

@@ -8,13 +8,15 @@ import (
 )
 
 type GlobalHandler struct {
-	UserHandler  *handlers.UserHandler
-	TweetHandler *handlers.TweetHandler
+	UserHandler     *handlers.UserHandler
+	TweetHandler    *handlers.TweetHandler
+	TimelineHandler *handlers.TimelineHandler
 }
 
-func NewRouters(userService services.IUserService, tweetService services.ITweetService) *gin.Engine {
+func NewRouters(userService services.IUserService, tweetService services.ITweetService, timelineService services.ITimelineService) *gin.Engine {
 	userHandler := &handlers.UserHandler{Service: userService}
 	tweetHandler := &handlers.TweetHandler{Service: tweetService}
+	timelineHandler := &handlers.TimelineHandler{Service: timelineService}
 
 	router := gin.Default()
 
@@ -26,6 +28,9 @@ func NewRouters(userService services.IUserService, tweetService services.ITweetS
 	//TWEET ROUTES
 	router.POST("/tweet/create", tweetHandler.CreateTweet)
 	router.GET("/tweet/:id", tweetHandler.FindTweetsByUserId)
+
+	//TIMELINE ROUTES
+	router.GET("/timeline/:id", timelineHandler.GetTimeline)
 
 	return router
 }
