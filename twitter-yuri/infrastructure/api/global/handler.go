@@ -20,9 +20,12 @@ func NewRouters(userService services.IUserService, tweetService services.ITweetS
 
 	//USER ROUTES
 	router.POST("/user/create", userHandler.CreateUser)
+	router.PATCH("/user/follow", userHandler.FollowUser)
+	router.PATCH("/user/unfollow", userHandler.UnfollowUser)
 
 	//TWEET ROUTES
 	router.POST("/tweet/create", tweetHandler.CreateTweet)
+	router.GET("/tweet/:id", tweetHandler.FindTweetsByUserId)
 
 	return router
 }
