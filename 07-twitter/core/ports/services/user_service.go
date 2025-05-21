@@ -14,6 +14,6 @@ type UserService interface {
 	// GetUserById() retorna um usuário pelo seu ID.
 	GetUserById(id string) (*userModel.User, error)
 
-	// Following() faz um usuário com userId seguir outro usuário com followingId
-	Following(userId, followingId uuid.UUID) error
+	// Follow() faz um usuário com userId seguir outro usuário com followingId
+	Follow(userId, followingId uuid.UUID) error
 }

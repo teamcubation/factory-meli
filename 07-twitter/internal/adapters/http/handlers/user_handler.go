@@ -79,7 +79,7 @@ type followRequest struct {
 	FollowingID string `json:"following_id"`
 }
 
-func (h *UserHandler) Following(c *gin.Context) {
+func (h *UserHandler) Follow(c *gin.Context) {
 	var req followRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -103,7 +103,7 @@ func (h *UserHandler) Following(c *gin.Context) {
 		return
 	}
 
-	if err := h.UserService.Following(userIdUuid, followingIdUuuid); err != nil {
+	if err := h.UserService.Follow(userIdUuid, followingIdUuuid); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

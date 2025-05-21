@@ -65,7 +65,7 @@ func (s *userServiceImpl) GetUserById(id string) (*model.User, error) {
 	return user, nil
 }
 
-func (s *userServiceImpl) Following(userId, followingId uuid.UUID) error {
+func (s *userServiceImpl) Follow(userId, followingId uuid.UUID) error {
 	erro := s.repo.Follow(userId, followingId)
 	if erro != nil {
 		return erro

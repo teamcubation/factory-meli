@@ -11,7 +11,7 @@ func NewRouter(handler *handlers.UserHandler) *gin.Engine {
 
 	router.POST("/users", handler.CreateUserHandler)
 	router.GET("/users/:id", handler.GetUserById)
-	router.POST("/users/follow", handler.Following)
+	router.POST("/users/follow", handler.Follow)
 
 	return router
 }
