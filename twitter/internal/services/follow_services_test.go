@@ -242,7 +242,7 @@ func TestFollowUser(t *testing.T) {
 			if tt.followedIDStr == "SAME_AS_FOLLOWER" {
 				// For this specific test, both IDs will be the same
 				parsedFollowerID = uuid.MustParse(tt.followerIDStr)
-				parsedFollowedID = parsedFollowerID // Set followedID to be the same as followerID
+				parsedFollowedID = parsedFollowerID
 			} else {
 				// Parse valid UUIDs for mocks
 				if tt.followerIDStr != "invalid-uuid" {
@@ -275,11 +275,11 @@ func TestFollowUser(t *testing.T) {
 			// Ensure the request URL for "SAME_AS_FOLLOWER" case uses the actual parsed ID
 			requestURL := "/follows/" + tt.followedIDStr
 			if tt.followedIDStr == "SAME_AS_FOLLOWER" {
-				requestURL = "/follows/" + parsedFollowedID.String() // Use the actual UUID string
+				requestURL = "/follows/" + parsedFollowedID.String()
 			}
 
 
-			req := httptest.NewRequest(http.MethodPost, requestURL, strings.NewReader(reqBody)) // Use requestURL
+			req := httptest.NewRequest(http.MethodPost, requestURL, strings.NewReader(reqBody))
 			rec := httptest.NewRecorder()
 
 			router.ServeHTTP(rec, req)
@@ -293,7 +293,7 @@ func TestFollowUser(t *testing.T) {
 			} else {
 				assert.NoError(t, actualErr)
 				assert.NotNil(t, actualFollow)
-				assert.Equal(t, parsedFollowerID, actualFollow.FollowerID) // Verify IDs
+				assert.Equal(t, parsedFollowerID, actualFollow.FollowerID)
 				assert.Equal(t, parsedFollowedID, actualFollow.FollowedID)
 			}
 
@@ -376,9 +376,7 @@ func TestUnfollowUser(t *testing.T) {
 			followerIDStr: uuid.New().String(),
 			followedIDStr: "invalid-uuid",
 			requestBody:   `{"follower_id": "%s"}`,
-			mockSetup: func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {
-				// NO mocks expected. The service will return 'invalid followed_id'
-			},
+			mockSetup: func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 		},
@@ -411,10 +409,8 @@ func TestUnfollowUser(t *testing.T) {
 			followerIDStr: uuid.New().String(),
 			followedIDStr: "SAME_AS_FOLLOWER",
 			requestBody:   `{"follower_id": "%s"}`,
-			mockSetup: func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {
-				// No FindByID calls are expected as the service checks for equality before DB calls
-			},
-			expectedStatus: http.StatusBadRequest, // Unfollow returns 400 for this case, as per previous discussion
+			mockSetup: func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {},
+			expectedStatus: http.StatusBadRequest, 
 			expectedError:  true,
 		},
 		{
