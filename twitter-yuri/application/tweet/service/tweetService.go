@@ -18,9 +18,7 @@ func NewTweetService(repo out.ITweetRepository) services.ITweetService {
 }
 
 func (s *TweetServiceImpl) CreateTweet(tweet *models.Tweet) error {
-
 	if err := s.repo.SaveTweet(tweet); err != nil {
-		fmt.Println("Error saving tweet:", err)
 		return err
 	}
 	return nil
@@ -29,7 +27,6 @@ func (s *TweetServiceImpl) CreateTweet(tweet *models.Tweet) error {
 func (s *TweetServiceImpl) ListTweetsByUserID(userId string) ([]*models.Tweet, error) {
 	tweets, err := s.repo.FindAllByUser(userId)
 	if err != nil {
-		fmt.Println("Error fetching tweets:", err)
 		return nil, err
 	}
 

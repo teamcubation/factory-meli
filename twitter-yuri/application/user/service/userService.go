@@ -62,23 +62,29 @@ func (s *UserServiceImpl) UnfollowUser(idUser, id string) error {
 }
 
 func (s *UserServiceImpl) checkCanFollow(idUser, followId string) (*models.User, error) {
+	if idUser == followId {
+		return nil, fmt.Errorf("user %s cannot follow himself", idUser)
+	}
 	user, errGet := s.GetUserById(idUser)
 	if errGet != nil {
 		return nil, errGet
 	}
 	if slices.Contains(user.FollowUsers, followId) {
-		return nil, fmt.Errorf("user %s already follows userId %s", user.Name, followId)
+		return nil, fmt.Errorf("user %s already follows userId %s", idUser, followId)
 	}
 	return user, nil
 }
 
 func (s *UserServiceImpl) checkCanUnfollow(idUser, followId string) (*models.User, error) {
+	if idUser == followId {
+		return nil, fmt.Errorf("user %s cannot unfollow himself", idUser)
+	}
 	user, errGet := s.GetUserById(idUser)
 	if errGet != nil {
 		return nil, errGet
 	}
 	if !slices.Contains(user.FollowUsers, followId) {
-		return nil, fmt.Errorf("user %s not follow the userId %s", user.Name, followId)
+		return nil, fmt.Errorf("user %s not follow the userId %s", idUser, followId)
 	}
 	return user, nil
 }
