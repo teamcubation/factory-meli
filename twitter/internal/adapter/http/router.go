@@ -38,6 +38,7 @@ func NewRouter(params NewRouterParams) *Router {
 	// Follow routes
 	followHandlers := FollowHandlers{params.FollowService}
 	mux.HandleFunc("POST /follows/{followed_id}", followHandlers.FollowUser)
+	mux.HandleFunc("DELETE /follows/{followed_id}", followHandlers.UnfollowUser)
 
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),

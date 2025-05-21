@@ -32,6 +32,10 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, followerIDStr, follo
 		return nil, errors.New("invalid followed id")
 	}
 
+	if followerID == followedID {
+		return nil, errors.New("cannot follow yourself")
+	}
+
 	existingFollow, err := s.repository.FindByIds(ctx, postgres.FollowFindByIdsParams{
 		FollowerID: followerID,
 		FollowedID: followedID,
@@ -44,10 +48,6 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, followerIDStr, follo
 		return nil, errors.New("follow relationship already exists")
 	}
 
-	if followerID == followedID {
-		return nil, errors.New("cannot follow yourself")
-	}
-
 	// Creating a new follow
 	follow, err := s.repository.Save(ctx, postgres.FollowSaveParams{
 		FollowerID: followerID,
@@ -58,4 +58,43 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, followerIDStr, follo
 	}
 
 	return follow, nil
+}
+
+func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, followerIDStr, followedIDStr string) (error) {
+	// First check if the follow relationship already exists
+	followerID, err := uuid.Parse(followerIDStr)
+	if err != nil {
+		return errors.New("invalid follower id")
+	}
+
+	followedID, err := uuid.Parse(followedIDStr)
+	if err != nil {
+		return errors.New("invalid followed id")
+	}
+
+	if followerID == followedID {
+		return errors.New("cannot unfollow yourself")
+	}
+
+	_, err = s.repository.FindByIds(ctx, postgres.FollowFindByIdsParams{
+		FollowerID: followerID,
+		FollowedID: followedID,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("cannot unfollow a user you don't follow")
+		}
+		return err
+	}
+
+	// Deleting the follow
+	err = s.repository.Delete(ctx, postgres.FollowDeleteParams{
+		FollowerID: followerID,
+		FollowedID: followedID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -15,6 +15,11 @@ func respondWithError(ctx context.Context, w http.ResponseWriter, code int, mess
 
 // respondWithJSON sends a JSON response
 func respondWithJSON(ctx context.Context, w http.ResponseWriter, code int, payload interface{}) {
+	if code == http.StatusNoContent {
+		w.WriteHeader(code)
+		return
+	}
+
 	response, err := json.Marshal(payload)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error marshaling JSON response", "error", err)

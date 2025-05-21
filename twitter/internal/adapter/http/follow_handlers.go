@@ -62,3 +62,30 @@ func modelFollowToFollow(follow models.Follow) Follow {
 		FollowedID: follow.FollowedID,
 	}
 }
+
+func (h FollowHandlers) UnfollowUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	followedIDStr := r.PathValue("followed_id")
+
+	type parameters struct {
+		FollowerIDStr string `json:"follower_id"`
+	}
+
+	// Parse request body
+	params := parameters{}
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		respondWithError(ctx, w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer r.Body.Close()
+
+	// Unfollow user using the service 
+	err := h.service.UnfollowUser(ctx, params.FollowerIDStr, followedIDStr)
+	if err != nil {
+		respondWithError(ctx, w, http.StatusInternalServerError, fmt.Sprintf("Failed to unfollow user: %v", err))
+		return
+	}
+
+	// Return success response
+	respondWithJSON(ctx, w, http.StatusNoContent, "")
+}
