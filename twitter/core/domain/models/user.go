@@ -14,3 +14,8 @@ type User struct {
 	DeletedAt sql.NullTime
 	Email     string
 }
+
+type UserWithTweets struct {
+	User
+	Tweets []Tweet
+}

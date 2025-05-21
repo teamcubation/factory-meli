@@ -18,9 +18,9 @@ type FollowHandlers struct {
 
 // Internal follow type to return json correctly
 type Follow struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID         uuid.UUID `json:"id"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 	FollowerID uuid.UUID `json:"follower_id"`
 	FollowedID uuid.UUID `json:"followed_id"`
 }
@@ -41,7 +41,7 @@ func (h FollowHandlers) FollowUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// Follow user using the service 
+	// Follow user using the service
 	follow, err := h.service.FollowUser(ctx, params.FollowerIDStr, followedIDStr)
 	if err != nil {
 		respondWithError(ctx, w, http.StatusInternalServerError, fmt.Sprintf("Failed to follow user: %v", err))
@@ -55,9 +55,9 @@ func (h FollowHandlers) FollowUser(w http.ResponseWriter, r *http.Request) {
 // Utilities
 func modelFollowToFollow(follow models.Follow) Follow {
 	return Follow{
-		ID:        follow.ID,
-		CreatedAt: follow.CreatedAt,
-		UpdatedAt: follow.UpdatedAt,
+		ID:         follow.ID,
+		CreatedAt:  follow.CreatedAt,
+		UpdatedAt:  follow.UpdatedAt,
 		FollowerID: follow.FollowerID,
 		FollowedID: follow.FollowedID,
 	}
@@ -79,7 +79,7 @@ func (h FollowHandlers) UnfollowUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// Unfollow user using the service 
+	// Unfollow user using the service
 	err := h.service.UnfollowUser(ctx, params.FollowerIDStr, followedIDStr)
 	if err != nil {
 		respondWithError(ctx, w, http.StatusInternalServerError, fmt.Sprintf("Failed to unfollow user: %v", err))

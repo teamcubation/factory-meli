@@ -50,8 +50,8 @@ func main() {
 	followService := services.NewFollowService(followRepo)
 
 	router := http.NewRouter(http.NewRouterParams{
-		UserService:  userService,
-		TweetService: tweetService,
+		UserService:   userService,
+		TweetService:  tweetService,
 		FollowService: followService,
 	})
 	router.Run(ctx)

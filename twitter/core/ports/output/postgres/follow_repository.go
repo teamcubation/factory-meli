@@ -96,7 +96,7 @@ type FollowFindByIdsParams struct {
 func (r *PostgresFollowRepository) FindByIds(ctx context.Context, params FollowFindByIdsParams) (*models.Follow, error) {
 	slog.InfoContext(ctx, "Getting a follow from the database", "follower_id", params.FollowerID, "followed_id", params.FollowedID)
 	query := `SELECT id, created_at, updated_at, follower_id, followed_id FROM follows WHERE follower_id = $1 AND followed_id = $2 AND deleted_at IS NULL;`
-	
+
 	var follow models.Follow
 	err := r.db.QueryRowContext(ctx, query, params.FollowerID, params.FollowedID).Scan(
 		&follow.ID,
@@ -109,7 +109,7 @@ func (r *PostgresFollowRepository) FindByIds(ctx context.Context, params FollowF
 		slog.ErrorContext(ctx, "Error querying row while selecting a follow", "error", err)
 		return nil, err
 	}
-	
+
 	return &follow, nil
 }
 

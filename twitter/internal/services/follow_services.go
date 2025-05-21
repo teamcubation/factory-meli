@@ -60,7 +60,7 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, followerIDStr, follo
 	return follow, nil
 }
 
-func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, followerIDStr, followedIDStr string) (error) {
+func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, followerIDStr, followedIDStr string) error {
 	// First check if the follow relationship already exists
 	followerID, err := uuid.Parse(followerIDStr)
 	if err != nil {

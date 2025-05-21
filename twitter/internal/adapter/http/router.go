@@ -18,8 +18,8 @@ type Router struct {
 
 // NewRouter creates a new Router with the given services
 type NewRouterParams struct {
-	UserService  services.UserServiceImpl
-	TweetService services.TweetServiceImpl
+	UserService   services.UserServiceImpl
+	TweetService  services.TweetServiceImpl
 	FollowService services.FollowServiceImpl
 }
 
@@ -29,6 +29,7 @@ func NewRouter(params NewRouterParams) *Router {
 	// User routes
 	userHandlers := UserHandlers{params.UserService}
 	mux.HandleFunc("POST /users", userHandlers.CreateUser)
+	mux.HandleFunc("GET /timeline/{user_id}", userHandlers.GetTimeline)
 
 	// Tweet routes
 	tweetHandlers := TweetHandlers{params.TweetService}

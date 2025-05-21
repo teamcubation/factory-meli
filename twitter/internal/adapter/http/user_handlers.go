@@ -16,12 +16,17 @@ type UserHandlers struct {
 	service services.UserServiceImpl
 }
 
-// Internal user type to return json correctly
+// Internal user types to return json correctly
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
+}
+
+type UserWithTweets struct {
+	User   `json:"user"`
+	Tweets []*Tweet `json:"tweets"`
 }
 
 func (h UserHandlers) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +55,23 @@ func (h UserHandlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(ctx, w, http.StatusCreated, modelUserToUser(*user))
 }
 
+func (h UserHandlers) GetTimeline(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	userIDStr := r.PathValue("user_id")
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+	tweetNumStr := r.URL.Query().Get("tweet_num")
+
+	timeline, err := h.service.GetUserTimeline(ctx, userIDStr, limitStr, offsetStr, tweetNumStr)
+	if err != nil {
+		respondWithError(ctx, w, http.StatusInternalServerError, fmt.Sprintf("Failed to get timeline: %v", err))
+		return
+	}
+
+	respondWithJSON(ctx, w, http.StatusOK, modelUsersWithTweetsToUsersWithTweets(timeline))
+}
+
 // Utilities
 func modelUserToUser(user models.User) User {
 	return User{
@@ -58,4 +80,29 @@ func modelUserToUser(user models.User) User {
 		UpdatedAt: user.UpdatedAt,
 		Email:     user.Email,
 	}
+}
+
+// Converting the tweet slice values into pointers
+func modelTweetsToTweetsFromValueSlice(tweets []models.Tweet) []*Tweet {
+	result := make([]*Tweet, len(tweets))
+	for i, tweet := range tweets {
+		newTweet := modelTweetToTweet(tweet)
+		result[i] = &newTweet
+	}
+	return result
+}
+
+func modelUserWithTweetsToUserWithTweets(user models.UserWithTweets) UserWithTweets {
+	return UserWithTweets{
+		User:   modelUserToUser(user.User),
+		Tweets: modelTweetsToTweetsFromValueSlice(user.Tweets),
+	}
+}
+
+func modelUsersWithTweetsToUsersWithTweets(users []*models.UserWithTweets) []UserWithTweets {
+	result := make([]UserWithTweets, len(users))
+	for i, user := range users {
+		result[i] = modelUserWithTweetsToUserWithTweets(*user)
+	}
+	return result
 }
