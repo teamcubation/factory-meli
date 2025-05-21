@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	dtos "Yuri/twitter/application/timeline/dto"
 	"Yuri/twitter/core/ports/services"
 	"net/http"
 
@@ -23,5 +24,5 @@ func (h *TimelineHandler) GetTimeline(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, timeline)
+	c.JSON(http.StatusOK, dtos.ModelToDTO(timeline))
 }
