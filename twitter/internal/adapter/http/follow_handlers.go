@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -44,7 +43,12 @@ func (h FollowHandlers) FollowUser(w http.ResponseWriter, r *http.Request) {
 	// Follow user using the service
 	follow, err := h.service.FollowUser(ctx, params.FollowerIDStr, followedIDStr)
 	if err != nil {
-		respondWithError(ctx, w, http.StatusInternalServerError, fmt.Sprintf("Failed to follow user: %v", err))
+		switch e := err.(type) {
+		case services.ServiceError:
+			respondWithError(ctx, w, err.(services.ServiceError).Code(), e.Error())
+		default:
+			respondWithError(ctx, w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 
@@ -82,7 +86,12 @@ func (h FollowHandlers) UnfollowUser(w http.ResponseWriter, r *http.Request) {
 	// Unfollow user using the service
 	err := h.service.UnfollowUser(ctx, params.FollowerIDStr, followedIDStr)
 	if err != nil {
-		respondWithError(ctx, w, http.StatusInternalServerError, fmt.Sprintf("Failed to unfollow user: %v", err))
+		switch e := err.(type) {
+		case services.ServiceError:
+			respondWithError(ctx, w, err.(services.ServiceError).Code(), e.Error())
+		default:
+			respondWithError(ctx, w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 

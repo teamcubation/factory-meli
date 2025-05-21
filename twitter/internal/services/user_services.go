@@ -3,8 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
-	"errors"
-	"fmt"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -30,11 +29,11 @@ func (s *UserServiceImpl) CreateUser(ctx context.Context, email string) (*models
 	var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 
 	if email == "" {
-		return nil, fmt.Errorf("email is an obligatory field")
+		return nil, ServiceError{http.StatusBadRequest, "email is an obligatory field"}
 	}
 
 	if !emailRegex.MatchString(email) {
-		return nil, fmt.Errorf("invalid email format")
+		return nil, ServiceError{http.StatusBadRequest, "invalid email format"}
 	}
 
 	// Verifying if the user email already has an account associated to it
@@ -46,7 +45,7 @@ func (s *UserServiceImpl) CreateUser(ctx context.Context, email string) (*models
 	}
 
 	if user != nil {
-		return nil, errors.New("there already exists an user with this email")
+		return nil, ServiceError{http.StatusBadRequest, "there already exists an user with this email"}
 	}
 
 	// Saving new user's info
@@ -67,7 +66,8 @@ func (s *UserServiceImpl) GetUserTimeline(ctx context.Context, userIDStr, limitS
 		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 {
 			limit = parsedLimit
 		} else {
-			return nil, fmt.Errorf("invalid limit")
+			
+			return nil, ServiceError{http.StatusBadRequest, "invalid limit"}
 		}
 	}
 
@@ -76,7 +76,7 @@ func (s *UserServiceImpl) GetUserTimeline(ctx context.Context, userIDStr, limitS
 		if parsedOffset, err := strconv.Atoi(offsetStr); err == nil && parsedOffset >= 0 {
 			offset = parsedOffset
 		} else {
-			return nil, fmt.Errorf("invalid offset")
+			return nil, ServiceError{http.StatusBadRequest, "invalid offset"}
 		}
 	}
 
@@ -85,13 +85,13 @@ func (s *UserServiceImpl) GetUserTimeline(ctx context.Context, userIDStr, limitS
 		if parsedTweetNum, err := strconv.Atoi(tweetNumStr); err == nil && parsedTweetNum >= 0 {
 			tweetNum = parsedTweetNum
 		} else {
-			return nil, fmt.Errorf("invalid tweet_num")
+			return nil, ServiceError{http.StatusBadRequest, "invalid tweet_num"}
 		}
 	}
 
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
-		return nil, errors.New("invalid user_id")
+			return nil, ServiceError{http.StatusBadRequest, "invalid user_id"}
 	}
 
 	// Verifying if the user email has an account associated to it
@@ -99,6 +99,9 @@ func (s *UserServiceImpl) GetUserTimeline(ctx context.Context, userIDStr, limitS
 		ID: userID,
 	})
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ServiceError{http.StatusNotFound, "user not found"}
+		}
 		return nil, err
 	}
 

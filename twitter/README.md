@@ -2,6 +2,9 @@
 
 ## Tecnologias utilizadas:
 - [Go](https://go.dev/) `v1.23.4`
+  - Library [uuid](https://github.com/google/uuid) `v1.6.0`
+  - Library [godotenv](https://github.com/joho/godotenv) `v1.5.1`
+  - Library [pq](https://github.com/lib/pq) `v1.10.9`
 - [PostgreSQL](https://www.postgresql.org/) `v16.6`
 - [Docker](https://www.docker.com/)
 

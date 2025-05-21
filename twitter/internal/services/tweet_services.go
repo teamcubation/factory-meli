@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -25,17 +25,17 @@ func (s *TweetServiceImpl) CreateTweet(ctx context.Context, post, creatorIDStr s
 	// Validating parameters
 	creatorID, err := uuid.Parse(creatorIDStr)
 	if err != nil {
-		return nil, fmt.Errorf("invalid creator id")
+		return nil, ServiceError{http.StatusBadRequest, "invalid creator_id"}
 	}
 
 	post = strings.TrimSpace(post)
 
 	if post == "" {
-		return nil, fmt.Errorf("post is an obligatory field")
+		return nil, ServiceError{http.StatusBadRequest, "post is an obligatory fields"}
 	}
 
 	if len(post) > 280 {
-		return nil, fmt.Errorf("post character limit is 280")
+		return nil, ServiceError{http.StatusBadRequest, "post character limit is 280"}
 	}
 
 	tweet, err := s.repository.Save(ctx, postgres.TweetSaveParams{
@@ -53,7 +53,7 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, creatorIDStr, l
 	// Validating parameters
 	creatorID, err := uuid.Parse(creatorIDStr)
 	if err != nil {
-		return nil, fmt.Errorf("invalid creator id")
+		return nil, ServiceError{http.StatusBadRequest, "invalid creator_id"}
 	}
 
 	limit := 10
@@ -61,7 +61,7 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, creatorIDStr, l
 		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 {
 			limit = parsedLimit
 		} else {
-			return nil, fmt.Errorf("invalid limit")
+		return nil, ServiceError{http.StatusBadRequest, "invalid limit"}
 		}
 	}
 
@@ -70,7 +70,7 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, creatorIDStr, l
 		if parsedOffset, err := strconv.Atoi(offsetStr); err == nil && parsedOffset >= 0 {
 			offset = parsedOffset
 		} else {
-			return nil, fmt.Errorf("invalid offset")
+		return nil, ServiceError{http.StatusBadRequest, "invalid offset"}
 		}
 	}
 

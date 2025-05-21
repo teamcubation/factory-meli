@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -34,7 +33,12 @@ func (h TweetHandlers) GetTweetsByCreator(w http.ResponseWriter, r *http.Request
 
 	tweets, err := h.service.GetAllUserTweets(ctx, creatorIDStr, limitStr, offsetStr)
 	if err != nil {
-		respondWithError(ctx, w, http.StatusInternalServerError, fmt.Sprintf("Couldn't get tweets for user: %v", err))
+		switch e := err.(type) {
+		case services.ServiceError:
+			respondWithError(ctx, w, err.(services.ServiceError).Code(), e.Error())
+		default:
+			respondWithError(ctx, w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 
@@ -60,7 +64,12 @@ func (h TweetHandlers) CreateTweet(w http.ResponseWriter, r *http.Request) {
 	// Create tweet using the service
 	tweet, err := h.service.CreateTweet(ctx, params.Post, creatorIDStr)
 	if err != nil {
-		respondWithError(ctx, w, http.StatusInternalServerError, fmt.Sprintf("Failed to create user: %v", err))
+		switch e := err.(type) {
+		case services.ServiceError:
+			respondWithError(ctx, w, err.(services.ServiceError).Code(), e.Error())
+		default:
+			respondWithError(ctx, w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 

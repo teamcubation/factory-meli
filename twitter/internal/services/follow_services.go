@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/twitter-tq/vinofsteel/core/domain/models"
@@ -24,16 +24,16 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, followerIDStr, follo
 	// First check if the follow relationship already exists
 	followerID, err := uuid.Parse(followerIDStr)
 	if err != nil {
-		return nil, errors.New("invalid follower id")
+		return nil, ServiceError{http.StatusBadRequest, "invalid follower_id"}
 	}
 
 	followedID, err := uuid.Parse(followedIDStr)
 	if err != nil {
-		return nil, errors.New("invalid followed id")
+		return nil, ServiceError{http.StatusBadRequest, "invalid followed_id"}
 	}
 
 	if followerID == followedID {
-		return nil, errors.New("cannot follow yourself")
+		return nil, ServiceError{http.StatusBadRequest, "cannot follow yourself"}
 	}
 
 	existingFollow, err := s.repository.FindByIds(ctx, postgres.FollowFindByIdsParams{
@@ -45,7 +45,7 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, followerIDStr, follo
 	}
 
 	if existingFollow != nil {
-		return nil, errors.New("follow relationship already exists")
+		return nil, ServiceError{http.StatusBadRequest, "follow relationship already exists"}
 	}
 
 	// Creating a new follow
@@ -64,16 +64,16 @@ func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, followerIDStr, fol
 	// First check if the follow relationship already exists
 	followerID, err := uuid.Parse(followerIDStr)
 	if err != nil {
-		return errors.New("invalid follower id")
+		return ServiceError{http.StatusBadRequest, "invalid follower_id"}
 	}
 
 	followedID, err := uuid.Parse(followedIDStr)
 	if err != nil {
-		return errors.New("invalid followed id")
+		return ServiceError{http.StatusBadRequest, "invalid followed_id"}
 	}
 
 	if followerID == followedID {
-		return errors.New("cannot unfollow yourself")
+		return ServiceError{http.StatusBadRequest, "cannot unfollow yourself"}
 	}
 
 	_, err = s.repository.FindByIds(ctx, postgres.FollowFindByIdsParams{
@@ -82,7 +82,7 @@ func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, followerIDStr, fol
 	})
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return errors.New("cannot unfollow a user you don't follow")
+			return ServiceError{http.StatusBadRequest, "cannot unfollow a user you don't follow"}
 		}
 		return err
 	}

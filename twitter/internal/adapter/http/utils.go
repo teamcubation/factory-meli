@@ -10,7 +10,7 @@ import (
 // respondWithError sends a JSON error response
 func respondWithError(ctx context.Context, w http.ResponseWriter, code int, message string) {
 	slog.ErrorContext(ctx, message, "status_code", code)
-	respondWithJSON(ctx, w, code, map[string]string{"error": message})
+	respondWithJSON(ctx, w, code, map[string]string{"message": message})
 }
 
 // respondWithJSON sends a JSON response

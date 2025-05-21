@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -47,7 +46,12 @@ func (h UserHandlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// Create user using the service
 	user, err := h.service.CreateUser(ctx, params.Email)
 	if err != nil {
-		respondWithError(ctx, w, http.StatusInternalServerError, fmt.Sprintf("Failed to create user: %v", err))
+		switch e := err.(type) {
+		case services.ServiceError:
+			respondWithError(ctx, w, err.(services.ServiceError).Code(), e.Error())
+		default:
+			respondWithError(ctx, w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 
@@ -65,7 +69,12 @@ func (h UserHandlers) GetTimeline(w http.ResponseWriter, r *http.Request) {
 
 	timeline, err := h.service.GetUserTimeline(ctx, userIDStr, limitStr, offsetStr, tweetNumStr)
 	if err != nil {
-		respondWithError(ctx, w, http.StatusInternalServerError, fmt.Sprintf("Failed to get timeline: %v", err))
+		switch e := err.(type) {
+		case services.ServiceError:
+			respondWithError(ctx, w, err.(services.ServiceError).Code(), e.Error())
+		default:
+			respondWithError(ctx, w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 
