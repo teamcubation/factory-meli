@@ -81,7 +81,7 @@ func (r *PostgresUserRepository) FindByEmail(ctx context.Context, params UserFin
 	return &user, nil
 }
 
-// FindByID retrieves a user by their email
+// FindByID retrieves a user by their ID
 type UserFindByIDParams struct {
 	ID uuid.UUID `json:"id"`
 }
