@@ -42,6 +42,16 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, r *http.Request) (*m
 		return nil, ServiceError{http.StatusBadRequest, "invalid follower_id"}
 	}
 
+	followedIDStr := r.PathValue("followed_id")
+	followedID, err := uuid.Parse(followedIDStr)
+	if err != nil {
+		return nil, ServiceError{http.StatusBadRequest, "invalid followed_id"}
+	}
+
+	if followerID == followedID {
+		return nil, ServiceError{http.StatusConflict, "cannot follow yourself"}
+	}
+
 	_, err = s.u_repository.FindByID(ctx, postgres.UserFindByIDParams{
 		ID: followerID,
 	})
@@ -50,12 +60,6 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, r *http.Request) (*m
 			return nil, ServiceError{http.StatusNotFound, "follower not found"}
 		}
 		return nil, err
-	}
-	
-	followedIDStr := r.PathValue("followed_id")
-	followedID, err := uuid.Parse(followedIDStr)
-	if err != nil {
-		return nil, ServiceError{http.StatusBadRequest, "invalid followed_id"}
 	}
 
 	_, err = s.u_repository.FindByID(ctx, postgres.UserFindByIDParams{
@@ -66,10 +70,6 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, r *http.Request) (*m
 			return nil, ServiceError{http.StatusNotFound, "followed not found"}
 		}
 		return nil, err
-	}
-	
-	if followerID == followedID {
-		return nil, ServiceError{http.StatusConflict, "cannot follow yourself"}
 	}
 	
 	// Check if the follow relationship already exists
@@ -114,6 +114,16 @@ func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, r *http.Request) e
 	if err != nil {
 		return ServiceError{http.StatusBadRequest, "invalid follower_id"}
 	}
+	
+	followedIDStr := r.PathValue("followed_id")
+	followedID, err := uuid.Parse(followedIDStr)
+	if err != nil {
+		return ServiceError{http.StatusBadRequest, "invalid followed_id"}
+	}
+
+	if followerID == followedID {
+		return ServiceError{http.StatusBadRequest, "cannot unfollow yourself"}
+	}
 
 	_, err = s.u_repository.FindByID(ctx, postgres.UserFindByIDParams{
 		ID: followerID,
@@ -124,12 +134,6 @@ func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, r *http.Request) e
 		}
 		return err
 	}
-	
-	followedIDStr := r.PathValue("followed_id")
-	followedID, err := uuid.Parse(followedIDStr)
-	if err != nil {
-		return ServiceError{http.StatusBadRequest, "invalid followed_id"}
-	}
 
 	_, err = s.u_repository.FindByID(ctx, postgres.UserFindByIDParams{
 		ID: followedID,
@@ -139,10 +143,6 @@ func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, r *http.Request) e
 		  return ServiceError{http.StatusNotFound, "followed not found"}
 		}
 		return err
-	}
-	
-	if followerID == followedID {
-		return ServiceError{http.StatusBadRequest, "cannot unfollow yourself"}
 	}
 	
 	// Check if the follow relationship exists

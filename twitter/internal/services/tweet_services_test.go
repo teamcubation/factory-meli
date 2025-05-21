@@ -54,9 +54,9 @@ func (m *MockTweetRepository) FindAllTweetsByUserId(ctx context.Context, params 
 func TestGetAllUserTweets(t *testing.T) {
 	tests := []struct {
 		name           string
-		creatorID      string // Keep as string for path parameter
+		creatorID      string
 		queryParams    string
-		mockSetup      func(*MockTweetRepository, *MockUserRepository, uuid.UUID) // Pass parsed UUID for mocks
+		mockSetup      func(*MockTweetRepository, *MockUserRepository, uuid.UUID)
 		expectedStatus int
 		expectedError  bool
 		expectedTweets int
