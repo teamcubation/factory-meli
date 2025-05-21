@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -27,11 +26,7 @@ type Tweet struct {
 func (h TweetHandlers) GetTweetsByCreator(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	creatorIDStr := r.PathValue("creator_id")
-	limitStr := r.URL.Query().Get("limit")
-	offsetStr := r.URL.Query().Get("offset")
-
-	tweets, err := h.service.GetAllUserTweets(ctx, creatorIDStr, limitStr, offsetStr)
+	tweets, err := h.service.GetAllUserTweets(ctx, r)
 	if err != nil {
 		switch e := err.(type) {
 		case services.ServiceError:
@@ -47,22 +42,9 @@ func (h TweetHandlers) GetTweetsByCreator(w http.ResponseWriter, r *http.Request
 
 func (h TweetHandlers) CreateTweet(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	creatorIDStr := r.PathValue("creator_id")
-
-	type parameters struct {
-		Post string `json:"post"`
-	}
-
-	// Parse request body
-	params := parameters{}
-	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondWithError(ctx, w, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-	defer r.Body.Close()
 
 	// Create tweet using the service
-	tweet, err := h.service.CreateTweet(ctx, params.Post, creatorIDStr)
+	tweet, err := h.service.CreateTweet(ctx, r)
 	if err != nil {
 		switch e := err.(type) {
 		case services.ServiceError:

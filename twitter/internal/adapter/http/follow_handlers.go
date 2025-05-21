@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -26,22 +25,9 @@ type Follow struct {
 
 func (h FollowHandlers) FollowUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	followedIDStr := r.PathValue("followed_id")
-
-	type parameters struct {
-		FollowerIDStr string `json:"follower_id"`
-	}
-
-	// Parse request body
-	params := parameters{}
-	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondWithError(ctx, w, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-	defer r.Body.Close()
 
 	// Follow user using the service
-	follow, err := h.service.FollowUser(ctx, params.FollowerIDStr, followedIDStr)
+	follow, err := h.service.FollowUser(ctx, r)
 	if err != nil {
 		switch e := err.(type) {
 		case services.ServiceError:
@@ -69,22 +55,9 @@ func modelFollowToFollow(follow models.Follow) Follow {
 
 func (h FollowHandlers) UnfollowUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	followedIDStr := r.PathValue("followed_id")
-
-	type parameters struct {
-		FollowerIDStr string `json:"follower_id"`
-	}
-
-	// Parse request body
-	params := parameters{}
-	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondWithError(ctx, w, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-	defer r.Body.Close()
 
 	// Unfollow user using the service
-	err := h.service.UnfollowUser(ctx, params.FollowerIDStr, followedIDStr)
+	err := h.service.UnfollowUser(ctx, r)
 	if err != nil {
 		switch e := err.(type) {
 		case services.ServiceError:

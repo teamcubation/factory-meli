@@ -23,3 +23,178 @@ Essa é uma API que foi construída para ser rodada utilizando o Docker, uma pod
 7. Caso você esteja em ambiente de desenvolvimento, as migrations do banco de dados não são rodadas automaticamente. No diretório raiz do repositório, rode o comando `make m-up` e elas serão rodadas no seu banco de dados (novamente, não se esqueça de preencher o seu `.env` antes de fazer isso, ou nada vai funcionar). Caso você utilize Windows e não tenha o `Make` instalado para rodar comandos do `Makefile`, eu recomendo a instalação [nesse link](https://gnuwin32.sourceforge.net/packages/make.htm) já que ele é essencial para o desenvolvimento em Go. Se ainda assim você você preferir não instalar, terá que montar a sua string de conexão do PostgreSQL manualmente e rodar o comando `goose -dir sql/schema postgres (PG_CONN_STRING) up` no seu terminal.
 8.  Quando tiver terminado a utilização, apenas dê um `ctrl + c` no terminal e execute o comando `docker-compose down` caso deseje deletar os containers. Como a aplicação possui um volume, os dados não serão perdidos no seu banco a não ser que você delete o volume também.
    1. Note que este comando pode variar dependendo da sua instalação ou distribuição do Linux, utilizando Debian no WSL 2, o meu é `docker compose down`.
+
+## Documentação da API
+
+A API oferece os seguintes endpoints para gerenciar usuários, tweets e relacionamentos de seguidores:
+
+### Usuários
+
+#### Criar um novo usuário
+- **URL**: `/users`
+- **Método**: `POST`
+- **Descrição**: Cria um novo usuário na plataforma
+- **Corpo da requisição**:
+  ```json
+  {
+    "email": "string"
+  }
+  ```
+- **Resposta de sucesso**:
+  - **Código**: 201 Created
+  - **Conteúdo**:
+    ```json
+    {
+      "id": "uuid",
+      "created_at": "string",
+      "updated_at": "string",
+      "email": "string",
+    }
+    ```
+- **Respostas de erro**:
+  - **Código**: 400 Bad Request - Se dados estiverem incompletos ou inválidos
+  - **Código**: 409 Conflict - Se o username ou email já existir
+
+### Timeline
+
+#### Obter timeline de um usuário
+- **URL**: `/timeline/{user_id}`
+- **Método**: `GET`
+- **Parâmetros de URL**:
+  - `user_id`: ID do usuário (UUID)
+- **Parâmetros de consulta (query params)**:
+  - `limit` (opcional): Número máximo de usuários a retornar (padrão: 10)
+  - `offset` (opcional): Índice inicial para paginação (padrão: 0)
+  - `tweet_num` (opcional): Número máximo de tweets por usuário seguido (padrão: 10)
+- **Descrição**: Retorna os tweets do usuário e das pessoas que ele segue, em ordem cronológica decrescente, com suporte a paginação
+- **Resposta de sucesso**:
+  - **Código**: 200 OK
+  - **Conteúdo**:
+    ```json
+    [
+      {
+        "user": {
+          "id": "uuid",
+          "created_at": "string",
+          "updated_at": "string",
+          "email": "string",
+        },
+        "tweets:" [
+          {
+            "id": "uuid",
+            "created_at": "string",
+            "updated_at": "string",
+            "post": "string",
+            "creator_id": "uuid",
+          }
+        ]
+      }
+    ]
+    ```
+- **Respostas de erro**:
+  - **Código**: 400 Bad Request - Se algum dos parâmetros de consulta for inválido
+  - **Código**: 404 Not Found - Se o usuário não existir
+
+### Tweets
+
+#### Criar um novo tweet
+- **URL**: `/tweets/{creator_id}`
+- **Método**: `POST`
+- **Parâmetros de URL**:
+  - `creator_id`: ID do usuário criador (UUID)
+- **Descrição**: Cria um novo tweet para o usuário especificado
+- **Corpo da requisição**:
+  ```json
+  {
+    "post": "string"
+  }
+  ```
+- **Resposta de sucesso**:
+  - **Código**: 201 Created
+  - **Conteúdo**:
+    ```json
+    {
+      "id": "uuid",
+      "created_at": "string",
+      "updated_at": "string",
+      "post": "string",
+      "creator_id": "uuid",
+    }
+    ```
+- **Respostas de erro**:
+  - **Código**: 400 Bad Request - Se o conteúdo estiver vazio ou inválido
+  - **Código**: 404 Not Found - Se o usuário não existir
+
+#### Listar tweets de um usuário
+- **URL**: `/tweets/{creator_id}`
+- **Método**: `GET`
+- **Parâmetros de URL**:
+  - `creator_id`: ID do usuário criador (UUID)
+- **Descrição**: Retorna todos os tweets criados pelo usuário, em ordem cronológica decrescente
+- **Resposta de sucesso**:
+  - **Código**: 200 OK
+  - **Conteúdo**:
+    ```json
+    [
+      {
+        "id": "uuid",
+        "created_at": "string",
+        "updated_at": "string",
+        "post": "string",
+        "creator_id": "uuid",
+      }
+    ]
+    ```
+- **Respostas de erro**:
+  - **Código**: 404 Not Found - Se o usuário não existir
+
+### Seguidores
+
+#### Seguir um usuário
+- **URL**: `/follows/{followed_id}`
+- **Método**: `POST`
+- **Parâmetros de URL**:
+  - `followed_id`: ID do usuário a seguir (UUID)
+- **Descrição**: Cria um relacionamento de seguidor entre o usuário autenticado e o usuário especificado
+- **Corpo da requisição**:
+  ```json
+  {
+    "follower_id": "uuid"
+  }
+  ```
+- **Resposta de sucesso**:
+  - **Código**: 201 Created
+  - **Conteúdo**:
+    ```json
+    {
+      "id": "uuid",
+      "created_at": "string",
+      "updated_at": "string",
+      "follower_id": "uuid",
+      "followed_id": "uuid",
+    }
+    ```
+- **Respostas de erro**:
+  - **Código**: 400 Bad Request - Se os dados estiverem incompletos
+  - **Código**: 404 Not Found - Se algum dos usuários não existir
+  - **Código**: 409 Conflict - Se o mesmo id for passado em ambos os parâmetros
+  - **Código**: 409 Conflict - Se o relacionamento já existir
+
+#### Deixar de seguir um usuário
+- **URL**: `/follows/{followed_id}`
+- **Método**: `DELETE`
+- **Parâmetros de URL**:
+  - `followed_id`: ID do usuário a deixar de seguir (UUID)
+- **Descrição**: Remove um relacionamento de seguidor entre o usuário autenticado e o usuário especificado
+- **Corpo da requisição**:
+  ```json
+  {
+    "follower_id": "uuid"
+  }
+  ```
+- **Resposta de sucesso**:
+  - **Código**: 204 No Content
+- **Respostas de erro**:
+  - **Código**: 400 Bad Request - Se os dados estiverem incompletos
+  - **Código**: 404 Not Found - Se algum dos usuários não existir
+  - **Código**: 404 Not Found - Se o relacionamento não existir

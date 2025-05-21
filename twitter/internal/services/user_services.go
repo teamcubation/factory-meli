@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -23,8 +24,21 @@ func NewUserService(repo postgres.UserRepository) UserServiceImpl {
 	}
 }
 
-func (s *UserServiceImpl) CreateUser(ctx context.Context, email string) (*models.User, error) {
+func (s *UserServiceImpl) CreateUser(ctx context.Context, r *http.Request) (*models.User, error) {
+	// Decoding body
+	type parameters struct {
+		Email string `json:"email"`
+	}
+
+	// Parse request body
+	params := parameters{}
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		return nil, ServiceError{http.StatusBadRequest, "invalid request payload"}
+	}
+	defer r.Body.Close()
+	
 	// Validating email
+	email := params.Email
 	email = strings.TrimSpace(email)
 	var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 
@@ -45,7 +59,7 @@ func (s *UserServiceImpl) CreateUser(ctx context.Context, email string) (*models
 	}
 
 	if user != nil {
-		return nil, ServiceError{http.StatusBadRequest, "there already exists an user with this email"}
+		return nil, ServiceError{http.StatusConflict, "there already exists an user with this email"}
 	}
 
 	// Saving new user's info
@@ -59,7 +73,12 @@ func (s *UserServiceImpl) CreateUser(ctx context.Context, email string) (*models
 	return user, nil
 }
 
-func (s *UserServiceImpl) GetUserTimeline(ctx context.Context, userIDStr, limitStr, offsetStr, tweetNumStr string) ([]*models.UserWithTweets, error) {
+func (s *UserServiceImpl) GetUserTimeline(ctx context.Context, r *http.Request) ([]*models.UserWithTweets, error) {
+	userIDStr := r.PathValue("user_id")
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+	tweetNumStr := r.URL.Query().Get("tweet_num")
+	
 	// Validating parameters
 	limit := 10
 	if limitStr != "" {

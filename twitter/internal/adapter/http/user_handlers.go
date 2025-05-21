@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -31,20 +30,7 @@ type UserWithTweets struct {
 func (h UserHandlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	type parameters struct {
-		Email string `json:"email"`
-	}
-
-	// Parse request body
-	params := parameters{}
-	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondWithError(ctx, w, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-	defer r.Body.Close()
-
-	// Create user using the service
-	user, err := h.service.CreateUser(ctx, params.Email)
+	user, err := h.service.CreateUser(ctx, r)
 	if err != nil {
 		switch e := err.(type) {
 		case services.ServiceError:
@@ -55,19 +41,13 @@ func (h UserHandlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return success response
 	respondWithJSON(ctx, w, http.StatusCreated, modelUserToUser(*user))
 }
 
 func (h UserHandlers) GetTimeline(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	userIDStr := r.PathValue("user_id")
-	limitStr := r.URL.Query().Get("limit")
-	offsetStr := r.URL.Query().Get("offset")
-	tweetNumStr := r.URL.Query().Get("tweet_num")
-
-	timeline, err := h.service.GetUserTimeline(ctx, userIDStr, limitStr, offsetStr, tweetNumStr)
+	timeline, err := h.service.GetUserTimeline(ctx, r)
 	if err != nil {
 		switch e := err.(type) {
 		case services.ServiceError:

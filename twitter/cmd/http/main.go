@@ -44,10 +44,10 @@ func main() {
 	userService := services.NewUserService(userRepo)
 
 	tweetRepo := postgres.NewPostgresTweetRepository(db)
-	tweetService := services.NewTweetService(tweetRepo)
+	tweetService := services.NewTweetService(tweetRepo, userRepo)
 
 	followRepo := postgres.NewPostgresFollowRepository(db)
-	followService := services.NewFollowService(followRepo)
+	followService := services.NewFollowService(followRepo, userRepo)
 
 	router := http.NewRouter(http.NewRouterParams{
 		UserService:   userService,

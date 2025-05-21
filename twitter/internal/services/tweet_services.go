@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,51 +14,27 @@ import (
 )
 
 type TweetServiceImpl struct {
-	repository postgres.TweetRepository
+	t_repository postgres.TweetRepository
+	u_repository postgres.UserRepository
 }
 
-func NewTweetService(repo postgres.TweetRepository) TweetServiceImpl {
+func NewTweetService(tweetRepo postgres.TweetRepository, userRepo postgres.UserRepository) TweetServiceImpl {
 	return TweetServiceImpl{
-		repository: repo,
+		t_repository: tweetRepo,
+		u_repository: userRepo,
 	}
 }
 
-func (s *TweetServiceImpl) CreateTweet(ctx context.Context, post, creatorIDStr string) (*models.Tweet, error) {
+func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, r *http.Request) ([]*models.Tweet, error) {	
 	// Validating parameters
-	creatorID, err := uuid.Parse(creatorIDStr)
-	if err != nil {
-		return nil, ServiceError{http.StatusBadRequest, "invalid creator_id"}
-	}
-
-	post = strings.TrimSpace(post)
-
-	if post == "" {
-		return nil, ServiceError{http.StatusBadRequest, "post is an obligatory fields"}
-	}
-
-	if len(post) > 280 {
-		return nil, ServiceError{http.StatusBadRequest, "post character limit is 280"}
-	}
-
-	tweet, err := s.repository.Save(ctx, postgres.TweetSaveParams{
-		Post:      post,
-		CreatorID: creatorID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return tweet, nil
-}
-
-func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, creatorIDStr, limitStr, offsetStr string) ([]*models.Tweet, error) {
-	// Validating parameters
+	creatorIDStr := r.PathValue("creator_id")
 	creatorID, err := uuid.Parse(creatorIDStr)
 	if err != nil {
 		return nil, ServiceError{http.StatusBadRequest, "invalid creator_id"}
 	}
 
 	limit := 10
+	limitStr := r.URL.Query().Get("limit")
 	if limitStr != "" {
 		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 {
 			limit = parsedLimit
@@ -66,6 +44,7 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, creatorIDStr, l
 	}
 
 	offset := 0
+	offsetStr := r.URL.Query().Get("offset")
 	if offsetStr != "" {
 		if parsedOffset, err := strconv.Atoi(offsetStr); err == nil && parsedOffset >= 0 {
 			offset = parsedOffset
@@ -74,7 +53,17 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, creatorIDStr, l
 		}
 	}
 
-	tweet, err := s.repository.FindAllTweetsByUserId(ctx, postgres.TweetFindAllTweetsByUserId{
+	_, err = s.u_repository.FindByID(ctx, postgres.UserFindByIDParams{
+		ID: creatorID,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ServiceError{http.StatusNotFound, "user not found"}
+		}
+		return nil, err
+	}
+
+	tweet, err := s.t_repository.FindAllTweetsByUserId(ctx, postgres.TweetFindAllTweetsByUserId{
 		CreatorID: creatorID,
 		Limit:     limit,
 		Offset:    offset,
@@ -85,3 +74,53 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, creatorIDStr, l
 
 	return tweet, nil
 }
+
+func (s *TweetServiceImpl) CreateTweet(ctx context.Context, r *http.Request) (*models.Tweet, error) {
+	// Parse request body
+	type parameters struct {
+		Post string `json:"post"`
+	}
+
+	params := parameters{}
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		return nil, ServiceError{http.StatusBadRequest, "invalid request payload"}
+	}
+	defer r.Body.Close()
+
+	// Validating parameters
+	post := strings.TrimSpace(params.Post)
+	if post == "" {
+		return nil, ServiceError{http.StatusBadRequest, "post is an obligatory fields"}
+	}
+
+	if len(post) > 280 {
+		return nil, ServiceError{http.StatusBadRequest, "post character limit is 280"}
+	}
+
+	creatorIDStr := r.PathValue("creator_id")
+	creatorID, err := uuid.Parse(creatorIDStr)
+	if err != nil {
+		return nil, ServiceError{http.StatusBadRequest, "invalid creator_id"}
+	}
+
+	_, err = s.u_repository.FindByID(ctx, postgres.UserFindByIDParams{
+		ID: creatorID,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ServiceError{http.StatusNotFound, "user not found"}
+		}
+		return nil, err
+	}
+
+	tweet, err := s.t_repository.Save(ctx, postgres.TweetSaveParams{
+		Post:      post,
+		CreatorID: creatorID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return tweet, nil
+}
+
