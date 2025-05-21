@@ -61,9 +61,19 @@ func (r *userRepositoryImpl) FindById(id uuid.UUID) (*model.User, error) {
 }
 
 func (r *userRepositoryImpl) Follow(userId, followingId uuid.UUID) error {
-	_, err := r.db.Exec(`INSERT INTO follows (user_id, follow_id) VALUES ($1, $2)`, userId, followingId)
-
-	return err
+	res, err := r.db.Exec(
+		`INSERT INTO follows (user_id, follow_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+		userId, followingId,
+	)
+	if err != nil {
+		return err
+	}
+	
+	rows, _ := res.RowsAffected()
+	if rows == 0 {
+		return errors.New("usuário já está seguindo esse perfil")
+	}
+	return nil
 }
 
 func (r *userRepositoryImpl) Unfollow(userId, followingId uuid.UUID) error {
