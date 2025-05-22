@@ -25,7 +25,7 @@ func NewTweetService(tweetRepo postgres.TweetRepository, userRepo postgres.UserR
 	}
 }
 
-func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, r *http.Request) ([]*models.Tweet, error) {	
+func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, r *http.Request) ([]*models.Tweet, error) {
 	// Validating parameter
 	limit := 10
 	limitStr := r.URL.Query().Get("limit")
@@ -33,7 +33,7 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, r *http.Request
 		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 {
 			limit = parsedLimit
 		} else {
-		return nil, ServiceError{http.StatusBadRequest, "invalid limit"}
+			return nil, ServiceError{http.StatusBadRequest, "invalid limit"}
 		}
 	}
 
@@ -43,7 +43,7 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, r *http.Request
 		if parsedOffset, err := strconv.Atoi(offsetStr); err == nil && parsedOffset >= 0 {
 			offset = parsedOffset
 		} else {
-		return nil, ServiceError{http.StatusBadRequest, "invalid offset"}
+			return nil, ServiceError{http.StatusBadRequest, "invalid offset"}
 		}
 	}
 
@@ -123,4 +123,3 @@ func (s *TweetServiceImpl) CreateTweet(ctx context.Context, r *http.Request) (*m
 
 	return tweet, nil
 }
-

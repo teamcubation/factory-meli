@@ -15,7 +15,7 @@ import (
 
 // User Repository Tests
 func TestUserSave_Success(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
@@ -50,7 +50,7 @@ func TestUserSave_Success(t *testing.T) {
 }
 
 func TestUserSave_Error(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
@@ -77,7 +77,7 @@ func TestUserSave_Error(t *testing.T) {
 }
 
 func TestUserSave_DuplicateEmailError(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
@@ -107,7 +107,7 @@ func TestUserSave_DuplicateEmailError(t *testing.T) {
 }
 
 func TestUserFindByEmail_Success(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
@@ -141,13 +141,14 @@ func TestUserFindByEmail_Success(t *testing.T) {
 }
 
 func TestUserFindByEmail_NotFound(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
 	})
 	defer db.Close()
 
+	// Test data
 	email := "notfound@example.com"
 
 	// Set up expectation for no rows found
@@ -168,13 +169,14 @@ func TestUserFindByEmail_NotFound(t *testing.T) {
 }
 
 func TestUserFindByEmail_DatabaseError(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
 	})
 	defer db.Close()
 
+	// Test data
 	email := "test@example.com"
 
 	// Set up expectation for database connection error
@@ -195,7 +197,7 @@ func TestUserFindByEmail_DatabaseError(t *testing.T) {
 }
 
 func TestUserFindByID_Success(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
@@ -229,13 +231,14 @@ func TestUserFindByID_Success(t *testing.T) {
 }
 
 func TestUserFindByID_NotFound(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
 	})
 	defer db.Close()
 
+	// Test data
 	userID := uuid.New()
 
 	// Set up expectation for no rows found
@@ -256,13 +259,14 @@ func TestUserFindByID_NotFound(t *testing.T) {
 }
 
 func TestUserFindByID_DatabaseError(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
 	})
 	defer db.Close()
 
+	// Test data
 	userID := uuid.New()
 
 	// Set up expectation for database connection error
@@ -283,7 +287,7 @@ func TestUserFindByID_DatabaseError(t *testing.T) {
 }
 
 func TestUserGetTimeline_Success(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
@@ -383,13 +387,14 @@ func TestUserGetTimeline_Success(t *testing.T) {
 }
 
 func TestUserGetTimeline_EmptyResult(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
 	})
 	defer db.Close()
 
+	// Test data
 	userID := uuid.New()
 
 	// Set up expectations for empty result
@@ -463,13 +468,14 @@ func TestUserGetTimeline_EmptyResult(t *testing.T) {
 }
 
 func TestUserGetTimeline_DatabaseError(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
 		return NewPostgresUserRepository(db)
 	})
 	defer db.Close()
 
+	// Test data
 	userID := uuid.New()
 
 	// Set up expectation for database error
@@ -541,27 +547,27 @@ func TestUserGetTimeline_DatabaseError(t *testing.T) {
 }
 
 func TestUserGetTimeline_MultipleFollowedUsersWithMultipleTweets(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
 	db, mock, repo := setupMockDB(t, func(db *sql.DB) UserRepository {
-        return NewPostgresUserRepository(db)
-    })
-    defer db.Close()
+		return NewPostgresUserRepository(db)
+	})
+	defer db.Close()
 
-    userID := uuid.New()
-    followedUserID1 := uuid.New()
-    followedUserID2 := uuid.New()
-    now := time.Now()
+	// Test data
+	userID := uuid.New()
+	followedUserID1 := uuid.New()
+	followedUserID2 := uuid.New()
+	now := time.Now()
 
-    // Generate some unique tweet IDs and times for better testing
-    tweetID1_1 := uuid.New()
-    tweetID2_1 := uuid.New()
+	// Generate some unique tweet IDs and times for better testing
+	tweetID1_1 := uuid.New()
+	tweetID2_1 := uuid.New()
 
-    tweetTime1_1 := now.Add(-5 * time.Minute)
-    tweetTime2_1 := now.Add(-3 * time.Minute)
+	tweetTime1_1 := now.Add(-5 * time.Minute)
+	tweetTime2_1 := now.Add(-3 * time.Minute)
 
-
-    expectedQuery := `
+	expectedQuery := `
         WITH followed_users AS \(
             SELECT followed_id 
             FROM follows 
@@ -607,47 +613,47 @@ func TestUserGetTimeline_MultipleFollowedUsersWithMultipleTweets(t *testing.T) {
         LIMIT \$3 OFFSET \$4;
     `
 
-    // Simulate rows for two followed users, each with two tweets
-    mock.ExpectQuery(expectedQuery).
-        WithArgs(userID, 1, 10, 0). // tweetsPerFollowed = 1
-        WillReturnRows(sqlmock.NewRows([]string{
-            "user_id", "email", "user_created_at", "user_updated_at",
-            "tweet_id", "tweet_created_at", "tweet_updated_at", "post", "creator_id",
-        }).
-            AddRow(followedUserID1, "followed1@example.com", now, now, tweetID1_1, tweetTime1_1, now, "Tweet 1 by followed 1", followedUserID1).
-            AddRow(followedUserID2, "followed2@example.com", now, now, tweetID2_1, tweetTime2_1, now, "Tweet 1 by followed 2", followedUserID2))
+	// Simulate rows for two followed users, each with two tweets
+	mock.ExpectQuery(expectedQuery).
+		WithArgs(userID, 1, 10, 0). // tweetsPerFollowed = 1
+		WillReturnRows(sqlmock.NewRows([]string{
+			"user_id", "email", "user_created_at", "user_updated_at",
+			"tweet_id", "tweet_created_at", "tweet_updated_at", "post", "creator_id",
+		}).
+			AddRow(followedUserID1, "followed1@example.com", now, now, tweetID1_1, tweetTime1_1, now, "Tweet 1 by followed 1", followedUserID1).
+			AddRow(followedUserID2, "followed2@example.com", now, now, tweetID2_1, tweetTime2_1, now, "Tweet 1 by followed 2", followedUserID2))
 
-    ctx := context.Background()
-    params := TimelineParams{
-        UserID:            userID,
-        TweetsPerFollowed: 1, // Only 1 tweet per followed user
-        Limit:             10,
-        Offset:            0,
-    }
-    result, err := repo.GetTimeline(ctx, params)
+	ctx := context.Background()
+	params := TimelineParams{
+		UserID:            userID,
+		TweetsPerFollowed: 1, // Only 1 tweet per followed user
+		Limit:             10,
+		Offset:            0,
+	}
+	result, err := repo.GetTimeline(ctx, params)
 
-    require.NoError(t, err)
-    require.Len(t, result, 2) // Expect 2 users in the result
+	require.NoError(t, err)
+	require.Len(t, result, 2) // Expect 2 users in the result
 
-    // Assert for followed user 1
-    user1 := result[0]
-    if user1.User.ID == followedUserID2 {
-        user1 = result[1]
-    }
-    assert.Equal(t, followedUserID1, user1.User.ID)
-    assert.Equal(t, "followed1@example.com", user1.User.Email)
-    require.Len(t, user1.Tweets, 1)
-    assert.Equal(t, tweetID1_1, user1.Tweets[0].ID)
+	// Assert for followed user 1
+	user1 := result[0]
+	if user1.User.ID == followedUserID2 {
+		user1 = result[1]
+	}
+	assert.Equal(t, followedUserID1, user1.User.ID)
+	assert.Equal(t, "followed1@example.com", user1.User.Email)
+	require.Len(t, user1.Tweets, 1)
+	assert.Equal(t, tweetID1_1, user1.Tweets[0].ID)
 
-    // Assert for followed user 2
-    user2 := result[1]
-    if user2.User.ID == followedUserID1 {
-        user2 = result[0]
-    }
-    assert.Equal(t, followedUserID2, user2.User.ID)
-    assert.Equal(t, "followed2@example.com", user2.User.Email)
-    require.Len(t, user2.Tweets, 1)
-    assert.Equal(t, tweetID2_1, user2.Tweets[0].ID)
+	// Assert for followed user 2
+	user2 := result[1]
+	if user2.User.ID == followedUserID1 {
+		user2 = result[0]
+	}
+	assert.Equal(t, followedUserID2, user2.User.ID)
+	assert.Equal(t, "followed2@example.com", user2.User.Email)
+	require.Len(t, user2.Tweets, 1)
+	assert.Equal(t, tweetID2_1, user2.Tweets[0].ID)
 
-    assert.NoError(t, mock.ExpectationsWereMet())
+	assert.NoError(t, mock.ExpectationsWereMet())
 }

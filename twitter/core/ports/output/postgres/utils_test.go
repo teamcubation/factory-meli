@@ -15,7 +15,7 @@ type RepositoryConstructor[T any] func(*sql.DB) T
 func setupMockDB[T any](t *testing.T, constructor RepositoryConstructor[T]) (*sql.DB, sqlmock.Sqlmock, T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
-	
+
 	repo := constructor(db)
 	return db, mock, repo
 }

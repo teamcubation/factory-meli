@@ -2,8 +2,8 @@ package services
 
 // Generic internal error used in the services for better error handling
 type ServiceError struct {
-	StatusCode int `json:"status_code"`
-	Message string `json:"message"`
+	StatusCode int    `json:"status_code"`
+	Message    string `json:"message"`
 }
 
 func (e ServiceError) Error() string {

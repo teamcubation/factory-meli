@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt" 
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -89,21 +89,21 @@ func TestFollowUser(t *testing.T) {
 			expectedFollow: &models.Follow{}, // Just check for non-nil
 		},
 		{
-			name:          "Invalid request payload",
-			followerIDStr: uuid.New().String(),
-			followedIDStr: uuid.New().String(),
-			requestBody:   `{"follower_id": 123}`, // Invalid JSON
-			mockSetup:     func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {}, // No mocks expected
+			name:           "Invalid request payload",
+			followerIDStr:  uuid.New().String(),
+			followedIDStr:  uuid.New().String(),
+			requestBody:    `{"follower_id": 123}`,                                                                            // Invalid JSON
+			mockSetup:      func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {}, // No mocks expected
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedFollow: nil,
 		},
 		{
-			name:          "Invalid follower ID in body",
-			followerIDStr: "invalid-uuid",
-			followedIDStr: uuid.New().String(), // Valid followed ID to reach follower parsing
-			requestBody:   `{"follower_id": "invalid-uuid"}`,
-			mockSetup:     func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {}, // No mocks expected
+			name:           "Invalid follower ID in body",
+			followerIDStr:  "invalid-uuid",
+			followedIDStr:  uuid.New().String(), // Valid followed ID to reach follower parsing
+			requestBody:    `{"follower_id": "invalid-uuid"}`,
+			mockSetup:      func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {}, // No mocks expected
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedFollow: nil,
@@ -278,7 +278,6 @@ func TestFollowUser(t *testing.T) {
 				requestURL = "/follows/" + parsedFollowedID.String()
 			}
 
-
 			req := httptest.NewRequest(http.MethodPost, requestURL, strings.NewReader(reqBody))
 			rec := httptest.NewRecorder()
 
@@ -332,20 +331,20 @@ func TestUnfollowUser(t *testing.T) {
 			expectedError:  false,
 		},
 		{
-			name:          "Invalid request payload",
-			followerIDStr: uuid.New().String(),
-			followedIDStr: uuid.New().String(),
-			requestBody:   `{"follower_id": 123}`, // Invalid JSON
-			mockSetup:     func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {},
+			name:           "Invalid request payload",
+			followerIDStr:  uuid.New().String(),
+			followedIDStr:  uuid.New().String(),
+			requestBody:    `{"follower_id": 123}`, // Invalid JSON
+			mockSetup:      func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 		},
 		{
-			name:          "Invalid follower ID in body",
-			followerIDStr: "invalid-uuid",
-			followedIDStr: uuid.New().String(),
-			requestBody:   `{"follower_id": "invalid-uuid"}`,
-			mockSetup:     func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {},
+			name:           "Invalid follower ID in body",
+			followerIDStr:  "invalid-uuid",
+			followedIDStr:  uuid.New().String(),
+			requestBody:    `{"follower_id": "invalid-uuid"}`,
+			mockSetup:      func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 		},
@@ -372,11 +371,11 @@ func TestUnfollowUser(t *testing.T) {
 			expectedError:  true,
 		},
 		{
-			name:          "Invalid followed ID in path",
-			followerIDStr: uuid.New().String(),
-			followedIDStr: "invalid-uuid",
-			requestBody:   `{"follower_id": "%s"}`,
-			mockSetup: func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {},
+			name:           "Invalid followed ID in path",
+			followerIDStr:  uuid.New().String(),
+			followedIDStr:  "invalid-uuid",
+			requestBody:    `{"follower_id": "%s"}`,
+			mockSetup:      func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 		},
@@ -405,12 +404,12 @@ func TestUnfollowUser(t *testing.T) {
 			expectedError:  true,
 		},
 		{
-			name:          "Cannot unfollow yourself",
-			followerIDStr: uuid.New().String(),
-			followedIDStr: "SAME_AS_FOLLOWER",
-			requestBody:   `{"follower_id": "%s"}`,
-			mockSetup: func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {},
-			expectedStatus: http.StatusBadRequest, 
+			name:           "Cannot unfollow yourself",
+			followerIDStr:  uuid.New().String(),
+			followedIDStr:  "SAME_AS_FOLLOWER",
+			requestBody:    `{"follower_id": "%s"}`,
+			mockSetup:      func(fRepo *MockFollowRepository, uRepo *MockUserRepository, followerID, followedID uuid.UUID) {},
+			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 		},
 		{
@@ -516,7 +515,6 @@ func TestUnfollowUser(t *testing.T) {
 			if tt.followedIDStr == "SAME_AS_FOLLOWER" {
 				requestURL = "/follows/" + parsedFollowedID.String() // Use the actual UUID string
 			}
-
 
 			req := httptest.NewRequest(http.MethodDelete, requestURL, strings.NewReader(reqBody)) // Unfollow uses DELETE method
 			rec := httptest.NewRecorder()

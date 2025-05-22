@@ -23,41 +23,41 @@ type MockUserRepository struct {
 
 func (m *MockUserRepository) FindByEmail(ctx context.Context, params postgres.UserFindByEmailParams) (*models.User, error) {
 	args := m.Called(ctx, params)
-	
+
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	
+
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
 func (m *MockUserRepository) FindByID(ctx context.Context, params postgres.UserFindByIDParams) (*models.User, error) {
 	args := m.Called(ctx, params)
-	
+
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	
+
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
 func (m *MockUserRepository) Save(ctx context.Context, params postgres.UserSaveParams) (*models.User, error) {
 	args := m.Called(ctx, params)
-	
+
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	
+
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
 func (m *MockUserRepository) GetTimeline(ctx context.Context, params postgres.TimelineParams) ([]*models.UserWithTweets, error) {
 	args := m.Called(ctx, params)
-	
+
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	
+
 	return args.Get(0).([]*models.UserWithTweets), args.Error(1)
 }
 
@@ -80,7 +80,7 @@ func TestCreateUser(t *testing.T) {
 				repo.On("FindByEmail", mock.Anything, postgres.UserFindByEmailParams{
 					Email: "test@example.com",
 				}).Return(nil, sql.ErrNoRows)
-				
+
 				// Mock Save to return a new user
 				newUser := &models.User{
 					ID:        uuid.New(),
@@ -94,12 +94,12 @@ func TestCreateUser(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			expectedError:  false,
-			expectedUser:   &models.User{},  // We'll just check that it's not nil
+			expectedUser:   &models.User{}, // We'll just check that it's not nil
 		},
 		{
-			name:        "Invalid email format",
-			requestBody: `{"email": "invalid-email"}`,
-			mockSetup:   func(repo *MockUserRepository) {},
+			name:           "Invalid email format",
+			requestBody:    `{"email": "invalid-email"}`,
+			mockSetup:      func(repo *MockUserRepository) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedUser:   nil,
@@ -124,9 +124,9 @@ func TestCreateUser(t *testing.T) {
 			expectedUser:   nil,
 		},
 		{
-			name:        "Empty email",
-			requestBody: `{"email": ""}`,
-			mockSetup:   func(repo *MockUserRepository) {},
+			name:           "Empty email",
+			requestBody:    `{"email": ""}`,
+			mockSetup:      func(repo *MockUserRepository) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedUser:   nil,
@@ -153,10 +153,10 @@ func TestCreateUser(t *testing.T) {
 			mockRepo := new(MockUserRepository)
 			tt.mockSetup(mockRepo)
 			service := NewUserService(mockRepo)
-			
+
 			req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(tt.requestBody))
 			user, err := service.CreateUser(context.Background(), req)
-			
+
 			if tt.expectedError {
 				assert.Error(t, err)
 				if svcErr, ok := err.(ServiceError); ok {
@@ -167,7 +167,7 @@ func TestCreateUser(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, user)
 			}
-			
+
 			mockRepo.AssertExpectations(t)
 		})
 	}
@@ -197,7 +197,7 @@ func TestGetUserTimeline(t *testing.T) {
 					UserID:            userID,
 					TweetsPerFollowed: 10,
 					Limit:             10,
-					Offset:            0, 
+					Offset:            0,
 				}
 				sampleTimeline := []*models.UserWithTweets{
 					{
@@ -251,10 +251,10 @@ func TestGetUserTimeline(t *testing.T) {
 			expectedResult: 1,
 		},
 		{
-			name:        "Invalid user ID in path",
-			userIDStr:   "invalid-uuid",
-			queryParams: "",
-			mockSetup:   func(repo *MockUserRepository, userID uuid.UUID) {}, // No mocks expected, fails early on UUID parse
+			name:           "Invalid user ID in path",
+			userIDStr:      "invalid-uuid",
+			queryParams:    "",
+			mockSetup:      func(repo *MockUserRepository, userID uuid.UUID) {}, // No mocks expected, fails early on UUID parse
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedResult: 0,
@@ -284,28 +284,28 @@ func TestGetUserTimeline(t *testing.T) {
 			expectedResult: 0,
 		},
 		{
-			name:        "Invalid limit parameter",
-			userIDStr:   uuid.New().String(), 
-			queryParams: "?limit=abc",
-			mockSetup:   func(repo *MockUserRepository, userID uuid.UUID) {},
+			name:           "Invalid limit parameter",
+			userIDStr:      uuid.New().String(),
+			queryParams:    "?limit=abc",
+			mockSetup:      func(repo *MockUserRepository, userID uuid.UUID) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedResult: 0,
 		},
 		{
-			name:        "Invalid offset parameter",
-			userIDStr:   uuid.New().String(), 
-			queryParams: "?offset=xyz",
-			mockSetup:   func(repo *MockUserRepository, userID uuid.UUID) {},
+			name:           "Invalid offset parameter",
+			userIDStr:      uuid.New().String(),
+			queryParams:    "?offset=xyz",
+			mockSetup:      func(repo *MockUserRepository, userID uuid.UUID) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedResult: 0,
 		},
 		{
-			name:        "Invalid tweet_num parameter",
-			userIDStr:   uuid.New().String(), 
-			queryParams: "?tweet_num=invalid",
-			mockSetup:   func(repo *MockUserRepository, userID uuid.UUID) {},
+			name:           "Invalid tweet_num parameter",
+			userIDStr:      uuid.New().String(),
+			queryParams:    "?tweet_num=invalid",
+			mockSetup:      func(repo *MockUserRepository, userID uuid.UUID) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedResult: 0,

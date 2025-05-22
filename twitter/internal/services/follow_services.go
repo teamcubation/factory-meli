@@ -34,7 +34,7 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, r *http.Request) (*m
 		return nil, ServiceError{http.StatusBadRequest, "invalid request payload"}
 	}
 	defer r.Body.Close()
-	
+
 	// Check if user ids are valid
 	followerIDStr := params.FollowerIDStr
 	followerID, err := uuid.Parse(followerIDStr)
@@ -71,7 +71,7 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, r *http.Request) (*m
 		}
 		return nil, err
 	}
-	
+
 	// Check if the follow relationship already exists
 	existingFollow, err := s.f_repository.FindByIds(ctx, postgres.FollowFindByIdsParams{
 		FollowerID: followerID,
@@ -108,13 +108,13 @@ func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, r *http.Request) e
 		return ServiceError{http.StatusBadRequest, "invalid request payload"}
 	}
 	defer r.Body.Close()
-	
+
 	followerIDStr := params.FollowerIDStr
 	followerID, err := uuid.Parse(followerIDStr)
 	if err != nil {
 		return ServiceError{http.StatusBadRequest, "invalid follower_id"}
 	}
-	
+
 	followedIDStr := r.PathValue("followed_id")
 	followedID, err := uuid.Parse(followedIDStr)
 	if err != nil {
@@ -130,7 +130,7 @@ func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, r *http.Request) e
 	})
 	if err != nil {
 		if err == sql.ErrNoRows {
-		  return ServiceError{http.StatusNotFound, "follower not found"}
+			return ServiceError{http.StatusNotFound, "follower not found"}
 		}
 		return err
 	}
@@ -140,11 +140,11 @@ func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, r *http.Request) e
 	})
 	if err != nil {
 		if err == sql.ErrNoRows {
-		  return ServiceError{http.StatusNotFound, "followed not found"}
+			return ServiceError{http.StatusNotFound, "followed not found"}
 		}
 		return err
 	}
-	
+
 	// Check if the follow relationship exists
 	_, err = s.f_repository.FindByIds(ctx, postgres.FollowFindByIdsParams{
 		FollowerID: followerID,

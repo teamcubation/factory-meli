@@ -119,19 +119,19 @@ func TestGetAllUserTweets(t *testing.T) {
 			expectedTweets: 0,
 		},
 		{
-			name:        "Invalid limit parameter",
-			creatorID:   uuid.New().String(),
-			queryParams: "?limit=abc",
-			mockSetup:   func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, cID uuid.UUID) {}, // No mocks expected since limit parsing fails first
+			name:           "Invalid limit parameter",
+			creatorID:      uuid.New().String(),
+			queryParams:    "?limit=abc",
+			mockSetup:      func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, cID uuid.UUID) {}, // No mocks expected since limit parsing fails first
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedTweets: 0,
 		},
 		{
-			name:        "Invalid offset parameter",
-			creatorID:   uuid.New().String(),
-			queryParams: "?offset=abc",
-			mockSetup:   func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, cID uuid.UUID) {}, // No mocks expected since offset parsing fails first
+			name:           "Invalid offset parameter",
+			creatorID:      uuid.New().String(),
+			queryParams:    "?offset=abc",
+			mockSetup:      func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, cID uuid.UUID) {}, // No mocks expected since offset parsing fails first
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedTweets: 0,
@@ -204,7 +204,7 @@ func TestCreateTweet(t *testing.T) {
 	tests := []struct {
 		name           string
 		requestBody    string
-		creatorID      string // Keep as string for path parameter
+		creatorID      string                                                     // Keep as string for path parameter
 		mockSetup      func(*MockTweetRepository, *MockUserRepository, uuid.UUID) // Pass parsed UUID for mocks
 		expectedStatus int
 		expectedError  bool
@@ -237,8 +237,8 @@ func TestCreateTweet(t *testing.T) {
 		},
 		{
 			name:           "Invalid request payload",
-			requestBody:    `{"post": 123}`, // Invalid JSON for post
-			creatorID:      uuid.New().String(), // Valid UUID to allow JSON parsing to fail
+			requestBody:    `{"post": 123}`,                                                                      // Invalid JSON for post
+			creatorID:      uuid.New().String(),                                                                  // Valid UUID to allow JSON parsing to fail
 			mockSetup:      func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, cID uuid.UUID) {}, // No mocks expected, JSON parsing fails first
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
@@ -247,7 +247,7 @@ func TestCreateTweet(t *testing.T) {
 		{
 			name:           "Empty post content",
 			requestBody:    `{"post": ""}`,
-			creatorID:      uuid.New().String(), // Valid UUID to reach post validation
+			creatorID:      uuid.New().String(),                                                                  // Valid UUID to reach post validation
 			mockSetup:      func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, cID uuid.UUID) {}, // No mocks expected, post validation fails first
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
@@ -255,8 +255,8 @@ func TestCreateTweet(t *testing.T) {
 		},
 		{
 			name:           "Post content too long",
-			requestBody:    `{"post": "` + strings.Repeat("a", 281) + `"}`, // 281 characters
-			creatorID:      uuid.New().String(), // Valid UUID to reach post validation
+			requestBody:    `{"post": "` + strings.Repeat("a", 281) + `"}`,                                       // 281 characters
+			creatorID:      uuid.New().String(),                                                                  // Valid UUID to reach post validation
 			mockSetup:      func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, cID uuid.UUID) {}, // No mocks expected, post validation fails first
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,

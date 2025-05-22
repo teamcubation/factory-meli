@@ -36,7 +36,7 @@ func (s *UserServiceImpl) CreateUser(ctx context.Context, r *http.Request) (*mod
 		return nil, ServiceError{http.StatusBadRequest, "invalid request payload"}
 	}
 	defer r.Body.Close()
-	
+
 	// Validating email
 	email := params.Email
 	email = strings.TrimSpace(email)
@@ -78,14 +78,14 @@ func (s *UserServiceImpl) GetUserTimeline(ctx context.Context, r *http.Request) 
 	limitStr := r.URL.Query().Get("limit")
 	offsetStr := r.URL.Query().Get("offset")
 	tweetNumStr := r.URL.Query().Get("tweet_num")
-	
+
 	// Validating parameters
 	limit := 10
 	if limitStr != "" {
 		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 {
 			limit = parsedLimit
 		} else {
-			
+
 			return nil, ServiceError{http.StatusBadRequest, "invalid limit"}
 		}
 	}
@@ -110,7 +110,7 @@ func (s *UserServiceImpl) GetUserTimeline(ctx context.Context, r *http.Request) 
 
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
-			return nil, ServiceError{http.StatusBadRequest, "invalid user_id"}
+		return nil, ServiceError{http.StatusBadRequest, "invalid user_id"}
 	}
 
 	// Verifying if the user email has an account associated to it
