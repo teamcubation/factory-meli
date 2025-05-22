@@ -13,7 +13,7 @@ import (
 )
 
 func Connect() (*mongo.Client, error) {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		return nil, err
 	}

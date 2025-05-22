@@ -1,9 +1,8 @@
-version: '1.0'
-
+version: '3.8'
 services:
   app:
     build: .
-    container_name: twitter-v1
+    image: twitter-image-production
     env_file:
       - .env
     ports:
