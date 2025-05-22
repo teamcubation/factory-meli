@@ -24,12 +24,12 @@ func (s *TweetServiceImpl) CreateTweet(tweet *models.Tweet) error {
 	return nil
 }
 
-func (s *TweetServiceImpl) ListTweetsByUserID(userId string) ([]*models.Tweet, error) {
-	tweets, err := s.repo.FindAllByUser(userId)
+func (s *TweetServiceImpl) ListTweetsByUserID(userId string, page, tweetsPerPage int) ([]*models.Tweet, error) {
+	tweets, err := s.repo.FindAllByUser(userId, page, tweetsPerPage)
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Printf("tweets: %v\n", tweets)
 	if len(tweets) == 0 {
 		return nil, fmt.Errorf("no tweets found for user ID: %s", userId)
 	}
