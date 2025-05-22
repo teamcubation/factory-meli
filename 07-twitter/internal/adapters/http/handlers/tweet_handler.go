@@ -22,7 +22,7 @@ func NewTweetHandler(tweetService service.TweetService) *TweetHandler {
 	}
 }
 
-// CreateTweetHandler lida com a criação de um novo tweet.
+// CreateTweet() lida com a criação de um novo tweet.
 // @route POST /tweets
 func (h *TweetHandler) CreateTweet(c *gin.Context) {
 	var req dto.TweetRequest
@@ -51,7 +51,7 @@ func (h *TweetHandler) CreateTweet(c *gin.Context) {
 	c.JSON(http.StatusCreated, tweet)
 }
 
-// GetTweetsByUserHandler retorna todos os tweets de um usuário específico.
+// GetTweetsByUser() retorna todos os tweets de um usuário específico.
 // @route GET /users/:id/tweets
 func (h *TweetHandler) GetTweetsByUser(c *gin.Context) {
 	id := c.Param("id")
@@ -69,7 +69,7 @@ func (h *TweetHandler) GetTweetsByUser(c *gin.Context) {
 	c.JSON(http.StatusOK, tweets)
 }
 
-// GetTimelineHandler retorna os últimos N tweets das contas seguidas pelo usuário.
+// GetTweetTimelineByUser() retorna os últimos N tweets das contas seguidas pelo usuário.
 // @route GET /users/:id/timeline?limit=10&offset=0
 func (h *TweetHandler) GetTweetTimelineByUser(c *gin.Context) {
 	id := c.Param("id")

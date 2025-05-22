@@ -12,12 +12,12 @@ import (
 	"github.com/google/uuid"
 )
 
-// UserHandler agrupa os serviços usados pelos endpoints HTTP.
+// UserHandler agrupa os serviços usados pelos endpoints HTTP de usuário.
 type UserHandler struct {
 	UserService service.UserService
 }
 
-// NewHandler() cria uma nova instância de Handler.
+// NewUserHandler() cria uma nova instância de UserHandler.
 func NewUserHandler(userService service.UserService) *UserHandler {
 	return &UserHandler{
 		UserService: userService,
@@ -47,6 +47,8 @@ func (h *UserHandler) CreateUserHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, newUser)
 }
 
+// GetUserById() retorna um usuário pelo seu ID.
+// @route GET /users/:id
 func (h *UserHandler) GetUserById(c *gin.Context) {
 	id := c.Param("id")
 
@@ -74,6 +76,8 @@ func (h *UserHandler) GetUserById(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// Follow() faz o usuário seguir outro usuário.
+// @route POST /users/follow
 func (h *UserHandler) Follow(c *gin.Context) {
 	var req dtos.FollowRequest
 
@@ -100,6 +104,8 @@ func (h *UserHandler) Follow(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Seguindo com sucesso"})
 }
 
+// Unfollow() faz o usuário deixar de seguir outro usuário.
+// @route POST /users/unfollow
 func (h *UserHandler) Unfollow(c *gin.Context) {
 	var req dtos.FollowRequest
 	req, ok := utils.BindAndValidateFollowRequest(c)
