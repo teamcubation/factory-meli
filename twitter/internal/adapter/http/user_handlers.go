@@ -1,6 +1,7 @@
 package http
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -29,6 +30,7 @@ type UserWithTweets struct {
 
 func (h UserHandlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	slog.InfoContext(ctx, "Calling handler to create a new user", "layer", "handler")
 
 	user, err := h.service.CreateUser(ctx, r)
 	if err != nil {
@@ -46,6 +48,7 @@ func (h UserHandlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (h UserHandlers) GetTimeline(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	slog.InfoContext(ctx, "Calling handler to get user timeline", "layer", "handler")
 
 	timeline, err := h.service.GetUserTimeline(ctx, r)
 	if err != nil {

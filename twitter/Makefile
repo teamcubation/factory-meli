@@ -35,7 +35,7 @@ run:
 .PHONY: run
 
 test:
-	go test ./... -count=1
+	go test ./... -v -count=1
 .PHONY: test
 
 # Goose migrations

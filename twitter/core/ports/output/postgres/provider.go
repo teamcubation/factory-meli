@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"os"
 	"time"
 
@@ -26,8 +27,10 @@ func NewPostgresDatabaseProvider() database.SQLProvider {
 }
 
 func (p *PostgresProvider) GetConnection(ctx context.Context) (*sql.DB, error) {
+	slog.InfoContext(ctx, "Getting postgres provider connection")
 	if p.db != nil {
 		if err := p.db.PingContext(ctx); err != nil {
+			slog.ErrorContext(ctx, "Error pinging connection to postgres database", "error", err, "layer", "db_provider")
 			err := p.db.Close()
 			return nil, err
 		}
@@ -37,6 +40,7 @@ func (p *PostgresProvider) GetConnection(ctx context.Context) (*sql.DB, error) {
 
 	db, err := sql.Open("postgres", p.connStr)
 	if err != nil {
+		slog.ErrorContext(ctx, "Error opening connection to postgres database", "error", err, "layer", "db_provider")
 		return nil, fmt.Errorf("error opening DB connection: %w", err)
 	}
 
@@ -44,6 +48,7 @@ func (p *PostgresProvider) GetConnection(ctx context.Context) (*sql.DB, error) {
 	db.SetConnMaxLifetime(5 * time.Minute)
 
 	if err := db.PingContext(ctx); err != nil {
+		slog.ErrorContext(ctx, "Error pinging connection to postgres database", "error", err, "layer", "db_provider")
 		if err := db.Close(); err != nil {
 			return nil, err
 		}

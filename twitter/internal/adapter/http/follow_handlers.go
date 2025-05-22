@@ -1,6 +1,7 @@
 package http
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -25,6 +26,7 @@ type Follow struct {
 
 func (h FollowHandlers) FollowUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	slog.InfoContext(ctx, "Calling handler to follow user", "layer", "handler")
 
 	// Follow user using the service
 	follow, err := h.service.FollowUser(ctx, r)
@@ -55,6 +57,7 @@ func modelFollowToFollow(follow models.Follow) Follow {
 
 func (h FollowHandlers) UnfollowUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	slog.InfoContext(ctx, "Calling handler to unfollow user", "layer", "handler")
 
 	// Unfollow user using the service
 	err := h.service.UnfollowUser(ctx, r)

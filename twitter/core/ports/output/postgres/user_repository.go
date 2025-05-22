@@ -35,7 +35,7 @@ type UserSaveParams struct {
 }
 
 func (r *PostgresUserRepository) Save(ctx context.Context, params UserSaveParams) (*models.User, error) {
-	slog.InfoContext(ctx, "Saving a new user to the database", "email", params.Email)
+	slog.InfoContext(ctx, "Saving a new user to the database", "email", params.Email, "layer", "database")
 	query := `INSERT INTO users (email) VALUES ($1) RETURNING id, created_at, updated_at, email;`
 
 	var user models.User
@@ -50,7 +50,7 @@ func (r *PostgresUserRepository) Save(ctx context.Context, params UserSaveParams
 		&user.Email,
 	)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error saving user to db", "error", err)
+		slog.ErrorContext(ctx, "Error saving user to db", "error", err, "layer", "database")
 		return nil, err
 	}
 
@@ -63,7 +63,7 @@ type UserFindByEmailParams struct {
 }
 
 func (r *PostgresUserRepository) FindByEmail(ctx context.Context, params UserFindByEmailParams) (*models.User, error) {
-	slog.InfoContext(ctx, "Finding an user by email", "email", params.Email)
+	slog.InfoContext(ctx, "Finding an user by email", "email", params.Email, "layer", "database")
 	query := `SELECT id, created_at, updated_at, email FROM users WHERE email = $1 AND deleted_at IS NULL;`
 
 	var user models.User
@@ -74,7 +74,7 @@ func (r *PostgresUserRepository) FindByEmail(ctx context.Context, params UserFin
 		&user.Email,
 	)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting user from db by email", "error", err, "email", params.Email)
+		slog.ErrorContext(ctx, "Error getting user from db by email", "error", err, "email", params.Email, "layer", "database")
 		return nil, err
 	}
 
@@ -87,7 +87,7 @@ type UserFindByIDParams struct {
 }
 
 func (r *PostgresUserRepository) FindByID(ctx context.Context, params UserFindByIDParams) (*models.User, error) {
-	slog.InfoContext(ctx, "Finding an user by ID", "id", params.ID)
+	slog.InfoContext(ctx, "Finding an user by ID", "id", params.ID, "layer", "database")
 	query := `SELECT id, created_at, updated_at, email FROM users WHERE id = $1 AND deleted_at IS NULL;`
 
 	var user models.User
@@ -98,7 +98,7 @@ func (r *PostgresUserRepository) FindByID(ctx context.Context, params UserFindBy
 		&user.Email,
 	)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting user from db by ID", "error", err, "id", params.ID)
+		slog.ErrorContext(ctx, "Error getting user from db by ID", "error", err, "id", params.ID, "layer", "database")
 		return nil, err
 	}
 
@@ -114,7 +114,7 @@ type TimelineParams struct {
 }
 
 func (r *PostgresUserRepository) GetTimeline(ctx context.Context, params TimelineParams) ([]*models.UserWithTweets, error) {
-	slog.InfoContext(ctx, "Fetching timeline for user", "user_id", params.UserID, "tweets_per_followed", params.TweetsPerFollowed, "limit", params.Limit, "offset", params.Offset)
+	slog.InfoContext(ctx, "Fetching timeline for user", "user_id", params.UserID, "tweets_per_followed", params.TweetsPerFollowed, "limit", params.Limit, "offset", params.Offset, "layer", "database")
 
 	// This query gets all users that the specified user follows and their tweets based on the business logic
 	query := `
@@ -165,7 +165,7 @@ func (r *PostgresUserRepository) GetTimeline(ctx context.Context, params Timelin
 
 	rows, err := r.db.QueryContext(ctx, query, params.UserID, params.TweetsPerFollowed, params.Limit, params.Offset)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error querying timeline", "error", err, "user_id", params.UserID)
+		slog.ErrorContext(ctx, "Error querying timeline", "error", err, "user_id", params.UserID, "layer", "database")
 		return nil, err
 	}
 	defer rows.Close()
@@ -193,7 +193,7 @@ func (r *PostgresUserRepository) GetTimeline(ctx context.Context, params Timelin
 			&post,
 			&creatorID,
 		); err != nil {
-			slog.ErrorContext(ctx, "Error scanning timeline row", "error", err)
+			slog.ErrorContext(ctx, "Error scanning timeline row", "error", err, "layer", "database")
 			return nil, err
 		}
 
@@ -224,7 +224,7 @@ func (r *PostgresUserRepository) GetTimeline(ctx context.Context, params Timelin
 	}
 
 	if err := rows.Err(); err != nil {
-		slog.ErrorContext(ctx, "Error when iterating rows", "error", err)
+		slog.ErrorContext(ctx, "Error when iterating rows", "error", err, "layer", "database")
 		return nil, err
 	}
 

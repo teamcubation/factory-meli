@@ -35,7 +35,7 @@ type TweetSaveParams struct {
 }
 
 func (r *PostgresTweetRepository) Save(ctx context.Context, params TweetSaveParams) (*models.Tweet, error) {
-	slog.InfoContext(ctx, "Saving a new tweet to the database", "post", params.Post, "creator_id", params.CreatorID)
+	slog.InfoContext(ctx, "Saving a new tweet to the database", "post", params.Post, "creator_id", params.CreatorID, "layer", "database")
 	query := `INSERT INTO tweets (post, creator_id) VALUES ($1, $2) RETURNING id, created_at, updated_at, post, creator_id;`
 
 	var tweet models.Tweet
@@ -52,7 +52,7 @@ func (r *PostgresTweetRepository) Save(ctx context.Context, params TweetSavePara
 		&tweet.CreatorID,
 	)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error saving tweet to db", "error", err)
+		slog.ErrorContext(ctx, "Error saving tweet to db", "error", err, "layer", "database")
 		return nil, err
 	}
 
@@ -65,7 +65,7 @@ type TweetFindByIDParams struct {
 }
 
 func (r *PostgresTweetRepository) FindByID(ctx context.Context, params TweetFindByIDParams) (*models.Tweet, error) {
-	slog.InfoContext(ctx, "Finding a tweet by id", "id", params.ID)
+	slog.InfoContext(ctx, "Finding a tweet by id", "id", params.ID, "layer", "database")
 	query := `SELECT id, created_at, updated_at, post, creator_id FROM tweets WHERE id = $1 AND deleted_at IS NULL;`
 
 	var tweet models.Tweet
@@ -77,7 +77,7 @@ func (r *PostgresTweetRepository) FindByID(ctx context.Context, params TweetFind
 		&tweet.CreatorID,
 	)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error saving getting tweet from db by ID", "error", err, "id", params.ID)
+		slog.ErrorContext(ctx, "Error saving getting tweet from db by ID", "error", err, "id", params.ID, "layer", "database")
 		return nil, err
 	}
 
@@ -91,7 +91,7 @@ type TweetFindAllTweetsByUserId struct {
 }
 
 func (r *PostgresTweetRepository) FindAllTweetsByUserId(ctx context.Context, params TweetFindAllTweetsByUserId) ([]*models.Tweet, error) {
-	slog.InfoContext(ctx, "Finding all tweets of a user by their id", "creator_id", params.CreatorID)
+	slog.InfoContext(ctx, "Finding all tweets of a user by their id", "creator_id", params.CreatorID, "layer", "database")
 
 	query := `
 		SELECT id, created_at, updated_at, post, creator_id
@@ -101,7 +101,7 @@ func (r *PostgresTweetRepository) FindAllTweetsByUserId(ctx context.Context, par
 
 	rows, err := r.db.QueryContext(ctx, query, params.CreatorID, params.Limit, params.Offset)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error querying db to find all tweets of a user", "error", err, "creator_id", params.CreatorID)
+		slog.ErrorContext(ctx, "Error querying db to find all tweets of a user", "error", err, "creator_id", params.CreatorID, "layer", "database")
 		return nil, err
 	}
 	defer rows.Close()
@@ -116,19 +116,19 @@ func (r *PostgresTweetRepository) FindAllTweetsByUserId(ctx context.Context, par
 			&t.Post,
 			&t.CreatorID,
 		); err != nil {
-			slog.ErrorContext(ctx, "Error scanning tweet", "error", err, "id", t.ID)
+			slog.ErrorContext(ctx, "Error scanning tweet", "error", err, "id", t.ID, "layer", "database")
 			return nil, err
 		}
 		tweets = append(tweets, &t)
 	}
 
 	if err := rows.Close(); err != nil {
-		slog.ErrorContext(ctx, "Error closing rows", "error", err)
+		slog.ErrorContext(ctx, "Error closing rows", "error", err, "layer", "database")
 		return nil, err
 	}
 
 	if err := rows.Err(); err != nil {
-		slog.ErrorContext(ctx, "Error when iterating rows", "error", err)
+		slog.ErrorContext(ctx, "Error when iterating rows", "error", err, "layer", "database")
 		return nil, err
 	}
 

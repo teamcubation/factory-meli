@@ -1,6 +1,7 @@
 package http
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -25,6 +26,7 @@ type Tweet struct {
 
 func (h TweetHandlers) GetTweetsByCreator(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	slog.InfoContext(ctx, "Calling handler to get tweets of an user", "layer", "handler")
 
 	tweets, err := h.service.GetAllUserTweets(ctx, r)
 	if err != nil {
@@ -42,6 +44,7 @@ func (h TweetHandlers) GetTweetsByCreator(w http.ResponseWriter, r *http.Request
 
 func (h TweetHandlers) CreateTweet(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	slog.InfoContext(ctx, "Calling handler to create a new tweet", "layer", "handler")
 
 	// Create tweet using the service
 	tweet, err := h.service.CreateTweet(ctx, r)
