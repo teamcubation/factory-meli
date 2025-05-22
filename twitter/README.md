@@ -6,28 +6,28 @@
   - Library [godotenv](https://github.com/joho/godotenv) `v1.5.1`
   - Library [pq](https://github.com/lib/pq) `v1.10.9`
   - Library [testify](https://github.com/stretchr/testify) `v1.10.0`
+  - Library [sql-mock](https://github.com/DATA-DOG/go-sqlmock) `v1.5.2`
 - [PostgreSQL](https://www.postgresql.org/) `v16.6`
 - [Docker](https://www.docker.com/)
+- CLI [Goose](https://github.com/pressly/goose) `v3.24.1`
+- CLI [Air](https://github.com/air-verse/air) `v1.61.7`
 
 ## Rodando a API:
 Essa é uma API que foi construída para ser rodada utilizando o Docker, uma poderosa ferramenta que permite a utilização de imagens de sistemas operacionais inteiros para a execução de código de forma consistente. Especificamente, para rodar essa API, utilizamos o [Docker Compose](https://docs.docker.com/compose/), que permite a utilização de múltiplos containers em um único serviço. Para rodar nosso código, é só seguir os seguintes passos:
-1. [Instale e configure](https://docs.docker.com/guides/getting-started/) o Docker.
-2. [Instale e configure](https://docs.docker.com/compose/install/) o Docker Compose.
-3. Crie um arquivo `.env` na raiz deste repositório e preencha as variáveis conforme o arquivo `.env.example`.
+1. [Clone](https://docs.github.com/pt/repositories/creating-and-managing-repositories/cloning-a-repository) esse repositório na sua máquina usando o Git.
+2. [Instale e configure](https://docs.docker.com/guides/getting-started/) o Docker.
+3. [Instale e configure](https://docs.docker.com/compose/install/) o Docker Compose.
+4. Crie um arquivo `.env` na raiz deste repositório e preencha as variáveis conforme o arquivo `.env.example`.
    1. Note que é extremamente importante preencher a variável `ENV` corretamente com o valor `development`, pois preencher ela com o valor `production` gera o executável para deployment sem utilizar o Docker Compose e não permite o hot-reloading da aplicação.
-4. Abra um terminal na raiz deste repositório.
-5. Execute o comando `docker-compose up --build`.
+5. Abra um terminal na raiz deste repositório.
+6. Execute o comando `docker-compose up --build`.
    1. Note que este comando pode variar dependendo da sua instalação ou distribuição do Linux, utilizando Debian no WSL 2, o meu é `docker compose up --build`.
    2. Também é possível executar isso usando o [Docker Desktop](https://www.docker.com/products/docker-desktop/), mas visto como eu não o utilizo pessoalmente, não deixei isso nessa documentação.
    3. Note que a flag `--build` só é necessária na primeira vez que rodar a imagem, ou caso hajam alterações na image/compose futuramente.
-6. Caso você tenha configurado seu ambiente corretamente, você deverá ter 2 containers rodando, um do banco de dados e um da API em si (rode o comando `docker container ls -a` para verificar). Em `development`, o container da API utiliza a ferramenta `Air` e graças as configurações do Docker Compose, o hot-reloading funciona. Em `production`, apenas é gerado um executável único que então é executado pela API, logo o hot-reloading não está disponível. É só acessar as rotas da API no seu browser ou API Client favorito.
-7. Caso você esteja em ambiente de desenvolvimento, as migrations do banco de dados não são rodadas automaticamente. No diretório raiz do repositório, rode o comando `make m-up` e elas serão rodadas no seu banco de dados (novamente, não se esqueça de preencher o seu `.env` antes de fazer isso, ou nada vai funcionar). Caso você utilize Windows e não tenha o `Make` instalado para rodar comandos do `Makefile`, eu recomendo a instalação [nesse link](https://gnuwin32.sourceforge.net/packages/make.htm) já que ele é essencial para o desenvolvimento em Go. Se ainda assim você você preferir não instalar, terá que montar a sua string de conexão do PostgreSQL manualmente e rodar o comando `goose -dir sql/schema postgres (PG_CONN_STRING) up` no seu terminal.
-8.  Quando tiver terminado a utilização, apenas dê um `ctrl + c` no terminal e execute o comando `docker-compose down` caso deseje deletar os containers. Como a aplicação possui um volume, os dados não serão perdidos no seu banco a não ser que você delete o volume também.
+7. Caso você tenha configurado seu ambiente corretamente, você deverá ter 2 containers rodando, um do banco de dados e um da API em si (rode o comando `docker container ls -a` para verificar). Em `development`, o container da API utiliza a ferramenta `Air` e graças as configurações do Docker Compose, o hot-reloading funciona. Em `production`, apenas é gerado um executável único que então é executado pela API, logo o hot-reloading não está disponível. É só acessar as rotas da API no seu browser ou API Client favorito.
+8. Caso você esteja em ambiente de desenvolvimento, as migrations do banco de dados não são rodadas automaticamente. Você precisa ter a CLI [Goose](https://github.com/pressly/goose) No diretório raiz do repositório, rode o comando `make m-up` e elas serão rodadas no seu banco de dados (novamente, não se esqueça de preencher o seu `.env` antes de fazer isso, ou nada vai funcionar). Caso você utilize Windows e não tenha o `Make` instalado para rodar comandos do `Makefile`, eu recomendo a instalação [nesse link](https://gnuwin32.sourceforge.net/packages/make.htm) já que ele é essencial para o desenvolvimento em Go. Se ainda assim você você preferir não instalar, terá que montar a sua string de conexão do PostgreSQL manualmente e rodar o comando `goose -dir sql/schema postgres PG_CONN_STRING up` no seu terminal, colocando sua string de conexão ao banco de dados no lugar do `PG_CONN_STRING`.
+9.  Quando tiver terminado a utilização, apenas dê um `ctrl + c` no terminal e execute o comando `docker-compose down` caso deseje deletar os containers. Como a aplicação possui um volume, os dados não serão perdidos no seu banco a não ser que você delete o volume também.
    1. Note que este comando pode variar dependendo da sua instalação ou distribuição do Linux, utilizando Debian no WSL 2, o meu é `docker compose down`.
-
-Excelente! Que bom que todos os testes estão passando. Isso demonstra a solidez e a boa cobertura dos seus serviços.
-
-Vamos adicionar uma seção de testes automatizados ao seu README.md em português, explicando como rodá-los.
 
 ## Testes Automatizados
 Esta aplicação conta com uma suíte de testes automatizados unitários para garantir a corretude e a qualidade do código. Os testes são implementados utilizando o framework de testes padrão do Go (testing) em conjunto com a biblioteca testify/mock para simular dependências e isolar os componentes a serem testados.
@@ -41,7 +41,7 @@ Para executar todos os testes da aplicação, siga estes passos:
 ### Explicação do comando
 - `go test`: O comando principal para executar testes Go.
 - `./...`: Este padrão indica que o go test deve procurar e executar todos os testes em todos os pacotes dentro do diretório atual e seus subdiretórios.
-- `-v`: (verbose) Esta flag exibe a saída detalhada de cada teste, mostrando quais testes passaram (PASS), quais falharam (FAIL) e qualquer log que você tenha adicionado (como os t.Logf que usamos para depuração).
+- `-v`: (verbose) Esta flag exibe a saída detalhada de cada teste, mostrando quais testes passaram (`PASS`), quais falharam (`FAIL`) e qualquer log da suíte.
 - `-count=1`: Esta flag é importante para garantir que os testes não sejam executados múltiplas vezes a partir do cache do Go. Isso é crucial quando se trabalha com mocks e estado, prevenindo resultados inconsistentes.
 
 ### Exemplo de Saída (Sucesso)
