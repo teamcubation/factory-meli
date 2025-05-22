@@ -27,10 +27,10 @@ func NewRouters(userService services.IUserService, tweetService services.ITweetS
 
 	//TWEET ROUTES
 	router.POST("/tweet/create", tweetHandler.CreateTweet)
-	router.GET("/tweet/:id", tweetHandler.FindTweetsByUserId)
+	router.GET("/tweet", tweetHandler.FindTweetsByUserId)
 
 	//TIMELINE ROUTES
-	router.GET("/timeline/:id", timelineHandler.GetTimeline)
+	router.GET("/timeline", timelineHandler.GetTimeline)
 
 	return router
 }
