@@ -5,7 +5,6 @@ import (
 	"Yuri/twitter/core/ports/out"
 	"Yuri/twitter/core/ports/services"
 	"fmt"
-	"sort"
 )
 
 type TimelineServiceImpl struct {
@@ -20,7 +19,7 @@ func NewTimelineService(repoTweet out.ITweetRepository, repoUser out.IUserReposi
 	}
 }
 
-func (s *TimelineServiceImpl) GetTimeline(userID string) ([]*models.Tweet, error) {
+func (s *TimelineServiceImpl) GetTimeline(userID string, page, tweetsPerPage int) ([]*models.Tweet, error) {
 	user, err := s.repoUser.GetById(userID)
 	if err != nil {
 		return nil, err
@@ -28,24 +27,9 @@ func (s *TimelineServiceImpl) GetTimeline(userID string) ([]*models.Tweet, error
 	if user == nil {
 		return nil, fmt.Errorf("user not found with ID: %s", userID)
 	}
-
-	following := user.FollowUsers
-	tweets := make([]*models.Tweet, 0)
-
-	for _, userID := range following {
-		userTweets, err := s.repoTweet.FindAllByUser(userID)
-		if err != nil {
-			return nil, err
-		}
-		tweets = append(tweets, userTweets...)
+	userTweets, err := s.repoTweet.FindAllByUserTimeline(user.FollowUsers, page, tweetsPerPage)
+	if err != nil {
+		return nil, err
 	}
-	tweetsSorted := sortTweetsByDate(tweets)
-	return tweetsSorted, nil
-}
-
-func sortTweetsByDate(tweets []*models.Tweet) []*models.Tweet {
-	sort.Slice(tweets, func(i, j int) bool {
-		return tweets[i].CreatedAt.After(tweets[j].CreatedAt)
-	})
-	return tweets
+	return userTweets, nil
 }
