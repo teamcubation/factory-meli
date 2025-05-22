@@ -9,6 +9,9 @@ CREATE TABLE users (
     email TEXT UNIQUE NOT NULL
 );
 
+-- Index for soft delete filtering
+CREATE INDEX idx_users_deleted_at ON users (deleted_at) WHERE deleted_at IS NULL;
+
 -- +goose Down
 DROP TABLE users;
 DROP EXTENSION "uuid-ossp";

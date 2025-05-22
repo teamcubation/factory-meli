@@ -10,7 +10,7 @@ CREATE TABLE follows (
 );
 
 -- Instead of a UNIQUE constraint, we use a partial unique index that only applies to non-deleted rows
-CREATE UNIQUE INDEX unique_active_follows ON follows (follower_id, followed_id) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX idx_follows_follower_active ON follows (follower_id, followed_id) WHERE deleted_at IS NULL;
 
 -- Create additional indices to speed up timeline queries
 CREATE INDEX idx_follows_follower_id ON follows (follower_id) WHERE deleted_at IS NULL;
