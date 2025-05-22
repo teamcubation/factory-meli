@@ -4,7 +4,9 @@ import (
 	"Yuri/twitter/core/models"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type tweetMapper struct {
@@ -43,4 +45,25 @@ func MongoToTweet(mapper *tweetMapper) *models.Tweet {
 		AuthorId:    mapper.AuthorId,
 		CreatedAt:   mapper.CreatedAt,
 	}
+}
+
+func ParamToFilter(key, value string) *bson.M {
+	return &bson.M{
+		key: value,
+	}
+}
+
+func ParamToArrayFilter(key string, value []string) *bson.M {
+	return &bson.M{
+		key: bson.M{"$in": value},
+	}
+}
+
+func NewOptionsPagination(page, tweetsPerPage int) *options.FindOptions {
+	skip := int64((page - 1) * tweetsPerPage)
+	options := options.Find()
+	options.SetSort(bson.D{{Key: "created_at", Value: -1}})
+	options.SetLimit(int64(tweetsPerPage))
+	options.SetSkip(skip)
+	return options
 }
