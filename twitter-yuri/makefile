@@ -2,7 +2,7 @@
 DOCKER_COMPOSE = docker compose
 
 # PHONY targets
-.PHONY: up-dev down logs clean help
+.PHONY: up down logs clean help
 
 up:
 	$(DOCKER_COMPOSE) up -d
