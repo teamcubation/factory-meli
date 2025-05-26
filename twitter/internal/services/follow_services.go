@@ -12,19 +12,25 @@ import (
 	"github.com/twitter-tq/vinofsteel/core/ports/output/postgres"
 )
 
+// FollowServices defines the interface for follow-related interactions
+type FollowServices interface {
+	FollowUser(ctx context.Context, r *http.Request) (*models.Follow, error)
+	UnfollowUser(ctx context.Context, r *http.Request) error
+}
+
 type FollowServiceImpl struct {
 	f_repository postgres.FollowRepository
 	u_repository postgres.UserRepository
 }
 
-func NewFollowService(followRepo postgres.FollowRepository, userRepo postgres.UserRepository) FollowServiceImpl {
+func NewFollowService(followRepo postgres.FollowRepository, userRepo postgres.UserRepository) FollowServices {
 	return FollowServiceImpl{
 		f_repository: followRepo,
 		u_repository: userRepo,
 	}
 }
 
-func (s *FollowServiceImpl) FollowUser(ctx context.Context, r *http.Request) (*models.Follow, error) {
+func (s FollowServiceImpl) FollowUser(ctx context.Context, r *http.Request) (*models.Follow, error) {
 	slog.InfoContext(ctx, "Calling service to follow an user", "layer", "service")
 
 	// Parse request body
@@ -115,7 +121,7 @@ func (s *FollowServiceImpl) FollowUser(ctx context.Context, r *http.Request) (*m
 	return follow, nil
 }
 
-func (s *FollowServiceImpl) UnfollowUser(ctx context.Context, r *http.Request) error {
+func (s FollowServiceImpl) UnfollowUser(ctx context.Context, r *http.Request) error {
 	slog.InfoContext(ctx, "Calling service to unfollow an user", "layer", "service")
 
 	// Parse request body

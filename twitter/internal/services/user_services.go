@@ -15,17 +15,23 @@ import (
 	"github.com/twitter-tq/vinofsteel/core/ports/output/postgres"
 )
 
+// UserServices defines the interface for user-related interactions
+type UserServices interface {
+	CreateUser(ctx context.Context, r *http.Request) (*models.User, error)
+	GetUserTimeline(ctx context.Context, r *http.Request) ([]*models.UserWithTweets, error)
+}
+
 type UserServiceImpl struct {
 	repository postgres.UserRepository
 }
 
-func NewUserService(repo postgres.UserRepository) UserServiceImpl {
+func NewUserService(repo postgres.UserRepository) UserServices {
 	return UserServiceImpl{
 		repository: repo,
 	}
 }
 
-func (s *UserServiceImpl) CreateUser(ctx context.Context, r *http.Request) (*models.User, error) {
+func (s UserServiceImpl) CreateUser(ctx context.Context, r *http.Request) (*models.User, error) {
 	slog.InfoContext(ctx, "Calling service to create a new user", "layer", "service")
 
 	// Decoding body
@@ -85,7 +91,7 @@ func (s *UserServiceImpl) CreateUser(ctx context.Context, r *http.Request) (*mod
 	return user, nil
 }
 
-func (s *UserServiceImpl) GetUserTimeline(ctx context.Context, r *http.Request) ([]*models.UserWithTweets, error) {
+func (s UserServiceImpl) GetUserTimeline(ctx context.Context, r *http.Request) ([]*models.UserWithTweets, error) {
 	slog.InfoContext(ctx, "Calling service to get user timeline", "layer", "service")
 
 	userIDStr := r.PathValue("user_id")

@@ -12,7 +12,7 @@ import (
 
 // TweetHandlers handles HTTP requests for tweet operations
 type TweetHandlers struct {
-	service services.TweetServiceImpl
+	service services.TweetServices
 }
 
 // Internal tweet type to return json correctly

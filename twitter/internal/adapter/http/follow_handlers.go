@@ -12,7 +12,7 @@ import (
 
 // FollowHandlers handles HTTP requests for follow operations
 type FollowHandlers struct {
-	service services.FollowServiceImpl
+	service services.FollowServices
 }
 
 // Internal follow type to return json correctly

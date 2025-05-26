@@ -12,7 +12,7 @@ import (
 
 // UserHandler handles HTTP requests for user operations
 type UserHandlers struct {
-	service services.UserServiceImpl
+	service services.UserServices
 }
 
 // Internal user types to return json correctly

@@ -14,19 +14,26 @@ import (
 	"github.com/twitter-tq/vinofsteel/core/ports/output/postgres"
 )
 
+
+// TweetServices defines the interface for tweet-related interactions
+type TweetServices interface {
+	GetAllUserTweets(ctx context.Context, r *http.Request) ([]*models.Tweet, error)
+	CreateTweet(ctx context.Context, r *http.Request) (*models.Tweet, error)
+}
+
 type TweetServiceImpl struct {
 	t_repository postgres.TweetRepository
 	u_repository postgres.UserRepository
 }
 
-func NewTweetService(tweetRepo postgres.TweetRepository, userRepo postgres.UserRepository) TweetServiceImpl {
+func NewTweetService(tweetRepo postgres.TweetRepository, userRepo postgres.UserRepository) TweetServices {
 	return TweetServiceImpl{
 		t_repository: tweetRepo,
 		u_repository: userRepo,
 	}
 }
 
-func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, r *http.Request) ([]*models.Tweet, error) {
+func (s TweetServiceImpl) GetAllUserTweets(ctx context.Context, r *http.Request) ([]*models.Tweet, error) {
 	slog.InfoContext(ctx, "Calling service to get all user tweets", "layer", "service")
 
 	// Validating parameter
@@ -87,7 +94,7 @@ func (s *TweetServiceImpl) GetAllUserTweets(ctx context.Context, r *http.Request
 	return tweets, nil
 }
 
-func (s *TweetServiceImpl) CreateTweet(ctx context.Context, r *http.Request) (*models.Tweet, error) {
+func (s TweetServiceImpl) CreateTweet(ctx context.Context, r *http.Request) (*models.Tweet, error) {
 	slog.InfoContext(ctx, "Calling service to create a new tweet", "layer", "service")
 
 	// Parse request body
