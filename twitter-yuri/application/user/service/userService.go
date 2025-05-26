@@ -19,7 +19,12 @@ func NewUserService(repo out.IUserRepository) services.IUserService {
 }
 
 func (s *UserServiceImpl) CreateUser(user *models.User) error {
-
+	if user == nil {
+		return fmt.Errorf("user is nil")
+	}
+	if user.Name == "" {
+		return fmt.Errorf("user name is required")
+	}
 	if err := s.repo.SaveUser(user); err != nil {
 		return err
 	}
@@ -27,7 +32,7 @@ func (s *UserServiceImpl) CreateUser(user *models.User) error {
 }
 
 func (s *UserServiceImpl) FollowUser(idUser, id string) error {
-	user, errFollow := s.checkCanFollow(idUser, id)
+	user, errFollow := s.CheckCanFollow(idUser, id)
 	if errFollow != nil {
 		return errFollow
 	}
@@ -44,7 +49,7 @@ func (s *UserServiceImpl) FollowUser(idUser, id string) error {
 }
 
 func (s *UserServiceImpl) UnfollowUser(idUser, id string) error {
-	user, errUnfollow := s.checkCanUnfollow(idUser, id)
+	user, errUnfollow := s.CheckCanUnfollow(idUser, id)
 	if errUnfollow != nil {
 		return errUnfollow
 	}
@@ -61,7 +66,18 @@ func (s *UserServiceImpl) UnfollowUser(idUser, id string) error {
 	return nil
 }
 
-func (s *UserServiceImpl) checkCanFollow(idUser, followId string) (*models.User, error) {
+func (s *UserServiceImpl) GetUserById(id string) (*models.User, error) {
+	user, errGet := s.repo.GetById(id)
+	if user == nil {
+		return nil, fmt.Errorf("user %s not found", id)
+	}
+	if errGet != nil {
+		return nil, errGet
+	}
+	return user, nil
+}
+
+func (s *UserServiceImpl) CheckCanFollow(idUser, followId string) (*models.User, error) {
 	if idUser == followId {
 		return nil, fmt.Errorf("user %s cannot follow himself", idUser)
 	}
@@ -75,7 +91,7 @@ func (s *UserServiceImpl) checkCanFollow(idUser, followId string) (*models.User,
 	return user, nil
 }
 
-func (s *UserServiceImpl) checkCanUnfollow(idUser, followId string) (*models.User, error) {
+func (s *UserServiceImpl) CheckCanUnfollow(idUser, followId string) (*models.User, error) {
 	if idUser == followId {
 		return nil, fmt.Errorf("user %s cannot unfollow himself", idUser)
 	}
@@ -85,16 +101,6 @@ func (s *UserServiceImpl) checkCanUnfollow(idUser, followId string) (*models.Use
 	}
 	if !slices.Contains(user.FollowUsers, followId) {
 		return nil, fmt.Errorf("user %s not follow the userId %s", idUser, followId)
-	}
-	return user, nil
-}
-func (s *UserServiceImpl) GetUserById(id string) (*models.User, error) {
-	user, errGet := s.repo.GetById(id)
-	if user == nil {
-		return nil, fmt.Errorf("user %s not found", id)
-	}
-	if errGet != nil {
-		return nil, errGet
 	}
 	return user, nil
 }

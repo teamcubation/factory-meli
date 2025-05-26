@@ -18,6 +18,9 @@ func NewTweetService(repo out.ITweetRepository) services.ITweetService {
 }
 
 func (s *TweetServiceImpl) CreateTweet(tweet *models.Tweet) error {
+	if tweet == nil {
+		return fmt.Errorf("tweet cannot be nil")
+	}
 	if err := s.repo.SaveTweet(tweet); err != nil {
 		return err
 	}
@@ -29,7 +32,6 @@ func (s *TweetServiceImpl) ListTweetsByUserID(userId string, page, tweetsPerPage
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("tweets: %v\n", tweets)
 	if len(tweets) == 0 {
 		return nil, fmt.Errorf("no tweets found for user ID: %s", userId)
 	}
