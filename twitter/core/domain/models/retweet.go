@@ -8,10 +8,10 @@ import (
 )
 
 type Retweet struct {
-	ID              uuid.UUID
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	DeletedAt       sql.NullTime
-	UserID          uuid.UUID
-	TweetID         uuid.UUID
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt sql.NullTime
+	UserID    uuid.UUID
+	TweetID   uuid.UUID
 }

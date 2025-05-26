@@ -54,9 +54,9 @@ func main() {
 	tweetInteractorService := services.NewTweetInteractor(userRepo, likeRepo, tweetRepo, retweetRepo)
 
 	router := http.NewRouter(http.NewRouterParams{
-		UserService:   userService,
-		TweetService:  tweetService,
-		FollowService: followService,
+		UserService:             userService,
+		TweetService:            tweetService,
+		FollowService:           followService,
 		TweetInteractorServices: tweetInteractorService,
 	})
 	router.Run(ctx)

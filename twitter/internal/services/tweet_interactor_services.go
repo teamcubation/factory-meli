@@ -150,7 +150,7 @@ func (s TweetInteractorServicesImpl) Unlike(ctx context.Context, r *http.Request
 	}
 
 	// Verify tweet exists
-	_, err = s.t_repository.FindByID(ctx, postgres.TweetFindByIDParams{ID: tweetID}) 
+	_, err = s.t_repository.FindByID(ctx, postgres.TweetFindByIDParams{ID: tweetID})
 	if err != nil {
 		if err == sql.ErrNoRows {
 			slog.ErrorContext(ctx, "Tweet not found for Unlike", "tweet_id", tweetID, "layer", "service")
@@ -252,8 +252,8 @@ func (s TweetInteractorServicesImpl) Retweet(ctx context.Context, r *http.Reques
 
 	// Add the retweet
 	retweet, err := s.r_repository.AddRetweet(ctx, postgres.RetweetAddParams{
-		UserID:          userID,
-		TweetID:         tweetID,
+		UserID:  userID,
+		TweetID: tweetID,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error adding retweet", "user_id", userID, "tweet_id", tweetID, "error", err, "layer", "service")

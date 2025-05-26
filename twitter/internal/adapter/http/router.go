@@ -18,10 +18,10 @@ type Router struct {
 
 // NewRouter creates a new Router with the given services
 type NewRouterParams struct {
-	UserService   services.UserServices
-	TweetService  services.TweetServices
+	UserService             services.UserServices
+	TweetService            services.TweetServices
 	TweetInteractorServices services.TweetInteractorServices
-	FollowService services.FollowServices
+	FollowService           services.FollowServices
 }
 
 func NewRouter(params NewRouterParams) *Router {

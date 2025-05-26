@@ -179,7 +179,7 @@ func TestFollowUser(t *testing.T) {
 				// IMPORTANT: No FindByID calls are expected here as the service checks for equality
 				// IMMEDIATELY after parsing both IDs, before any DB checks.
 			},
-			expectedStatus: http.StatusConflict, // Expect 409 as defined in service
+			expectedStatus: http.StatusConflict,
 			expectedError:  true,
 			expectedFollow: nil,
 		},

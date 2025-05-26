@@ -94,17 +94,17 @@ func modelLikeToLike(like models.Like) Like {
 		ID:        like.ID,
 		CreatedAt: like.CreatedAt,
 		UpdatedAt: like.UpdatedAt,
-		UserID: like.UserID,
-		TweetID: like.TweetID,
+		UserID:    like.UserID,
+		TweetID:   like.TweetID,
 	}
 }
 
 func modelRetweetToRetweet(retweet models.Retweet) Retweet {
 	return Retweet{
-		ID: retweet.ID,
+		ID:        retweet.ID,
 		CreatedAt: retweet.CreatedAt,
 		UpdatedAt: retweet.UpdatedAt,
-		UserID: retweet.UserID,
-		TweetID: retweet.TweetID,
+		UserID:    retweet.UserID,
+		TweetID:   retweet.TweetID,
 	}
 }

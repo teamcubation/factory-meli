@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"log/slog" // Import slog
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,7 +13,6 @@ import (
 	"github.com/twitter-tq/vinofsteel/core/domain/models"
 	"github.com/twitter-tq/vinofsteel/core/ports/output/postgres"
 )
-
 
 // TweetServices defines the interface for tweet-related interactions
 type TweetServices interface {

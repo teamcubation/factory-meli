@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"log/slog" // Import slog
+	"log/slog"
 	"net/http"
 
 	"github.com/google/uuid"

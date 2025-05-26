@@ -48,8 +48,8 @@ func (r *PostgresRetweetRepository) HasRetweet(ctx context.Context, params Retwe
 
 // AddRetweet adds a new retweet to the database
 type RetweetAddParams struct {
-	UserID          uuid.UUID `json:"user_id"`
-	TweetID         uuid.UUID `json:"tweet_id"`
+	UserID  uuid.UUID `json:"user_id"`
+	TweetID uuid.UUID `json:"tweet_id"`
 }
 
 func (r *PostgresRetweetRepository) AddRetweet(ctx context.Context, params RetweetAddParams) (*models.Retweet, error) {
