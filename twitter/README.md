@@ -270,3 +270,74 @@ A API oferece os seguintes endpoints para gerenciar usuários, tweets e relacion
   - **Código**: 400 Bad Request - Se os dados estiverem incompletos
   - **Código**: 404 Not Found - Se algum dos usuários não existir
   - **Código**: 404 Not Found - Se o relacionamento não existir
+
+
+### Interações de Tweet
+
+#### Curtir um tweet
+- **URL**: `/tweets/{id}/like`
+- **Método**: `POST`
+- **Parâmetros de URL**:
+  - `id`: ID do tweet a ser curtido (UUID)
+- **Descrição**: Permite a um usuário curtir um tweet específico.
+- **Corpo da requisição**:
+  ```json
+  {
+    "user_id": "uuid"
+  }
+  ```
+- **Resposta de sucesso**:
+  - **Código**: 200 OK
+  - **Conteúdo**:
+    ```json
+    {
+      "message": "Tweet liked successfully"
+    }
+    ```
+- **Respostas de erro**:
+  - **Código**: 400 Bad Request - Se o `user_id` no corpo for inválido ou o `id` do tweet na URL for inválido, ou se a requisição for malformada.
+  - **Código**: 404 Not Found - Se o usuário ou o tweet não existirem.
+  - **Código**: 409 Conflict - Se o usuário já tiver curtido o tweet.
+
+#### Descurtir um tweet
+- **URL**: `/tweets/{id}/like`
+- **Método**: `DELETE`
+- **Parâmetros de URL**:
+  - `id`: ID do tweet a ser descurtido (UUID)
+- **Descrição**: Permite a um usuário descurtir um tweet específico.
+- **Corpo da requisição**:
+  ```json
+  {
+    "user_id": "uuid"
+  }
+  ```
+- **Resposta de sucesso**:
+  - **Código**: 204 No Content
+- **Respostas de erro**:
+  - **Código**: 400 Bad Request - Se o `user_id` no corpo for inválido ou o `id` do tweet na URL for inválido, ou se a requisição for malformada.
+  - **Código**: 404 Not Found - Se o usuário ou o tweet não existirem, ou se o usuário não tiver curtido o tweet.
+
+#### Retweetar um tweet
+- **URL**: `/tweets/{id}/retweet`
+- **Método**: `POST`
+- **Parâmetros de URL**:
+  - `id`: ID do tweet a ser retweetado (UUID)
+- **Descrição**: Permite a um usuário retweetar um tweet específico.
+- **Corpo da requisição**:
+  ```json
+  {
+    "user_id": "uuid"
+  }
+  ```
+- **Resposta de sucesso**:
+  - **Código**: 200 OK
+  - **Conteúdo**:
+    ```json
+    {
+      "message": "Tweet retweeted successfully"
+    }
+    ```
+- **Respostas de erro**:
+  - **Código**: 400 Bad Request - Se o `user_id` no corpo for inválido ou o `id` do tweet na URL for inválido, ou se a requisição for malformada, ou se o usuário tentar retweetar o próprio tweet.
+  - **Código**: 404 Not Found - Se o usuário ou o tweet não existirem.
+  - **Código**: 409 Conflict - Se o usuário já tiver retweetado o tweet.

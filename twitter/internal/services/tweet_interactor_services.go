@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"log/slog"
 	"net/http"
 
@@ -12,9 +13,9 @@ import (
 
 // TweetInteractor defines the interface for tweet-related actions like liking, unliking, and retweeting.
 type TweetInteractorServices interface {
-	Like(ctx context.Context, userID, tweetID string) error
-	Unlike(ctx context.Context, userID, tweetID string) error
-	Retweet(ctx context.Context, userID, tweetID string) error
+	Like(ctx context.Context, r *http.Request) error
+	Unlike(ctx context.Context, r *http.Request) error
+	Retweet(ctx context.Context, r *http.Request) error
 }
 
 // TweetInteractorServicesImpl implements the TweetInteractor interface.
@@ -36,18 +37,31 @@ func NewTweetInteractor(userRepo postgres.UserRepository, likeRepo postgres.Like
 }
 
 // Like allows a user to like a tweet.
-func (s TweetInteractorServicesImpl) Like(ctx context.Context, userIDStr, tweetIDStr string) error {
-	slog.InfoContext(ctx, "Calling service to like a tweet", "user_id_str", userIDStr, "tweet_id_str", tweetIDStr, "layer", "service")
+func (s TweetInteractorServicesImpl) Like(ctx context.Context, r *http.Request) error {
+	slog.InfoContext(ctx, "Calling service to like a tweet", "layer", "service")
 
-	userID, err := uuid.Parse(userIDStr)
+	// Parse request body for UserID
+	type params struct {
+		UserIDStr string `json:"user_id"`
+	}
+
+	requestParams := params{}
+	if err := json.NewDecoder(r.Body).Decode(&requestParams); err != nil {
+		slog.ErrorContext(ctx, "Invalid request payload for Like", "error", err, "layer", "service")
+		return ServiceError{http.StatusBadRequest, "invalid request payload"}
+	}
+	defer r.Body.Close()
+
+	userID, err := uuid.Parse(requestParams.UserIDStr)
 	if err != nil {
-		slog.ErrorContext(ctx, "Invalid user ID for Like", "user_id_str", userIDStr, "error", err, "layer", "service")
+		slog.ErrorContext(ctx, "Invalid user ID from payload for Like", "user_id_str", requestParams.UserIDStr, "error", err, "layer", "service")
 		return ServiceError{http.StatusBadRequest, "invalid user ID"}
 	}
 
+	tweetIDStr := r.PathValue("id")
 	tweetID, err := uuid.Parse(tweetIDStr)
 	if err != nil {
-		slog.ErrorContext(ctx, "Invalid tweet ID for Like", "tweet_id_str", tweetIDStr, "error", err, "layer", "service")
+		slog.ErrorContext(ctx, "Invalid tweet ID from path for Like", "tweet_id_str", tweetIDStr, "error", err, "layer", "service")
 		return ServiceError{http.StatusBadRequest, "invalid tweet ID"}
 	}
 
@@ -95,19 +109,31 @@ func (s TweetInteractorServicesImpl) Like(ctx context.Context, userIDStr, tweetI
 	return nil
 }
 
-// Unlike allows a user to unlike a tweet.
-func (s TweetInteractorServicesImpl) Unlike(ctx context.Context, userIDStr, tweetIDStr string) error {
-	slog.InfoContext(ctx, "Calling service to unlike a tweet", "user_id_str", userIDStr, "tweet_id_str", tweetIDStr, "layer", "service")
+func (s TweetInteractorServicesImpl) Unlike(ctx context.Context, r *http.Request) error {
+	slog.InfoContext(ctx, "Calling service to unlike a tweet", "layer", "service")
 
-	userID, err := uuid.Parse(userIDStr)
+	// Parse request body for UserID
+	type params struct {
+		UserIDStr string `json:"user_id"`
+	}
+
+	requestParams := params{}
+	if err := json.NewDecoder(r.Body).Decode(&requestParams); err != nil {
+		slog.ErrorContext(ctx, "Invalid request payload for Unlike", "error", err, "layer", "service")
+		return ServiceError{http.StatusBadRequest, "invalid request payload"}
+	}
+	defer r.Body.Close()
+
+	userID, err := uuid.Parse(requestParams.UserIDStr)
 	if err != nil {
-		slog.ErrorContext(ctx, "Invalid user ID for Unlike", "user_id_str", userIDStr, "error", err, "layer", "service")
+		slog.ErrorContext(ctx, "Invalid user ID from payload for Unlike", "user_id_str", requestParams.UserIDStr, "error", err, "layer", "service")
 		return ServiceError{http.StatusBadRequest, "invalid user ID"}
 	}
 
+	tweetIDStr := r.PathValue("id")
 	tweetID, err := uuid.Parse(tweetIDStr)
 	if err != nil {
-		slog.ErrorContext(ctx, "Invalid tweet ID for Unlike", "tweet_id_str", tweetIDStr, "error", err, "layer", "service")
+		slog.ErrorContext(ctx, "Invalid tweet ID from path for Unlike", "tweet_id_str", tweetIDStr, "error", err, "layer", "service")
 		return ServiceError{http.StatusBadRequest, "invalid tweet ID"}
 	}
 
@@ -123,7 +149,7 @@ func (s TweetInteractorServicesImpl) Unlike(ctx context.Context, userIDStr, twee
 	}
 
 	// Verify tweet exists
-	_, err = s.t_repository.FindByID(ctx, postgres.TweetFindByIDParams{ID: tweetID}) // Assuming TweetRepository has a FindByID
+	_, err = s.t_repository.FindByID(ctx, postgres.TweetFindByIDParams{ID: tweetID}) 
 	if err != nil {
 		if err == sql.ErrNoRows {
 			slog.ErrorContext(ctx, "Tweet not found for Unlike", "tweet_id", tweetID, "layer", "service")
@@ -156,18 +182,31 @@ func (s TweetInteractorServicesImpl) Unlike(ctx context.Context, userIDStr, twee
 }
 
 // Retweet allows a user to retweet a tweet.
-func (s TweetInteractorServicesImpl) Retweet(ctx context.Context, userIDStr, tweetIDStr string) error {
-	slog.InfoContext(ctx, "Calling service to retweet a tweet", "user_id_str", userIDStr, "tweet_id_str", tweetIDStr, "layer", "service")
+func (s TweetInteractorServicesImpl) Retweet(ctx context.Context, r *http.Request) error {
+	slog.InfoContext(ctx, "Calling service to retweet a tweet", "layer", "service")
 
-	userID, err := uuid.Parse(userIDStr)
+	// Parse request body for UserID
+	type params struct {
+		UserIDStr string `json:"user_id"`
+	}
+
+	requestParams := params{}
+	if err := json.NewDecoder(r.Body).Decode(&requestParams); err != nil {
+		slog.ErrorContext(ctx, "Invalid request payload for Retweet", "error", err, "layer", "service")
+		return ServiceError{http.StatusBadRequest, "invalid request payload"}
+	}
+	defer r.Body.Close()
+
+	userID, err := uuid.Parse(requestParams.UserIDStr)
 	if err != nil {
-		slog.ErrorContext(ctx, "Invalid user ID for Retweet", "user_id_str", userIDStr, "error", err, "layer", "service")
+		slog.ErrorContext(ctx, "Invalid user ID from payload for Retweet", "user_id_str", requestParams.UserIDStr, "error", err, "layer", "service")
 		return ServiceError{http.StatusBadRequest, "invalid user ID"}
 	}
 
+	tweetIDStr := r.PathValue("id")
 	tweetID, err := uuid.Parse(tweetIDStr)
 	if err != nil {
-		slog.ErrorContext(ctx, "Invalid tweet ID for Retweet", "tweet_id_str", tweetIDStr, "error", err, "layer", "service")
+		slog.ErrorContext(ctx, "Invalid tweet ID from path for Retweet", "tweet_id_str", tweetIDStr, "error", err, "layer", "service")
 		return ServiceError{http.StatusBadRequest, "invalid tweet ID"}
 	}
 

@@ -37,6 +37,12 @@ func NewRouter(params NewRouterParams) *Router {
 	mux.HandleFunc("POST /tweets/{creator_id}", tweetHandlers.CreateTweet)
 	mux.HandleFunc("GET /tweets/{creator_id}", tweetHandlers.GetTweetsByCreator)
 
+	// Tweet interactor routes
+	tweetInteractorHandlers := TweetInteractorHandlers{params.TweetInteractorServices}
+	mux.HandleFunc("POST /tweets/{id}/like", tweetInteractorHandlers.LikeTweet)
+	mux.HandleFunc("DELETE /tweets/{id}/like", tweetInteractorHandlers.UnlikeTweet)
+	mux.HandleFunc("POST /tweets/{id}/retweet", tweetInteractorHandlers.RetweetTweet)
+
 	// Follow routes
 	followHandlers := FollowHandlers{params.FollowService}
 	mux.HandleFunc("POST /follows/{followed_id}", followHandlers.FollowUser)

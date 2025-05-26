@@ -49,10 +49,15 @@ func main() {
 	followRepo := postgres.NewPostgresFollowRepository(db)
 	followService := services.NewFollowService(followRepo, userRepo)
 
+	likeRepo := postgres.NewPostgresLikeRepository(db)
+	retweetRepo := postgres.NewPostgresRetweetRepository(db)
+	tweetInteractorService := services.NewTweetInteractor(userRepo, likeRepo, tweetRepo, retweetRepo)
+
 	router := http.NewRouter(http.NewRouterParams{
 		UserService:   userService,
 		TweetService:  tweetService,
 		FollowService: followService,
+		TweetInteractorServices: tweetInteractorService,
 	})
 	router.Run(ctx)
 }
