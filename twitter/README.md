@@ -291,7 +291,11 @@ A API oferece os seguintes endpoints para gerenciar usuários, tweets e relacion
   - **Conteúdo**:
     ```json
     {
-      "message": "Tweet liked successfully"
+      "id": "uuid",
+      "created_at": "string",
+      "updated_at": "string",
+      "user_id": "uuid",
+      "tweet_id": "uuid",
     }
     ```
 - **Respostas de erro**:
@@ -334,7 +338,12 @@ A API oferece os seguintes endpoints para gerenciar usuários, tweets e relacion
   - **Conteúdo**:
     ```json
     {
-      "message": "Tweet retweeted successfully"
+      "id": "uuid",
+      "created_at": "string",
+      "updated_at": "string",
+      "user_id": "uuid",
+      "tweet_id": "uuid",
+      "original_tweet_id": "uuid"
     }
     ```
 - **Respostas de erro**:

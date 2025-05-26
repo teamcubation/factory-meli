@@ -50,12 +50,11 @@ func (r *PostgresRetweetRepository) HasRetweet(ctx context.Context, params Retwe
 type RetweetAddParams struct {
 	UserID          uuid.UUID `json:"user_id"`
 	TweetID         uuid.UUID `json:"tweet_id"`
-	OriginalTweetID uuid.UUID `json:"original_tweet_id"`
 }
 
 func (r *PostgresRetweetRepository) AddRetweet(ctx context.Context, params RetweetAddParams) (*models.Retweet, error) {
-	slog.InfoContext(ctx, "Adding retweet to database", "user_id", params.UserID, "tweet_id", params.TweetID, "original_tweet_id", params.OriginalTweetID, "layer", "database")
-	query := `INSERT INTO retweets (user_id, tweet_id, original_tweet_id) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at, user_id, tweet_id, original_tweet_id;`
+	slog.InfoContext(ctx, "Adding retweet to database", "user_id", params.UserID, "tweet_id", params.TweetID, "layer", "database")
+	query := `INSERT INTO retweets (user_id, tweet_id) VALUES ($1, $2) RETURNING id, created_at, updated_at, user_id, tweet_id;`
 
 	var retweet models.Retweet
 	err := r.db.QueryRowContext(
@@ -63,17 +62,15 @@ func (r *PostgresRetweetRepository) AddRetweet(ctx context.Context, params Retwe
 		query,
 		params.UserID,
 		params.TweetID,
-		params.OriginalTweetID,
 	).Scan(
 		&retweet.ID,
 		&retweet.CreatedAt,
 		&retweet.UpdatedAt,
 		&retweet.UserID,
 		&retweet.TweetID,
-		&retweet.OriginalTweetID,
 	)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error adding retweet to db", "error", err, "user_id", params.UserID, "tweet_id", params.TweetID, "original_tweet_id", params.OriginalTweetID, "layer", "database")
+		slog.ErrorContext(ctx, "Error adding retweet to db", "error", err, "user_id", params.UserID, "tweet_id", params.TweetID, "layer", "database")
 		return nil, err
 	}
 

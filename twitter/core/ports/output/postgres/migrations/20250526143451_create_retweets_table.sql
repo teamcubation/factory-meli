@@ -6,27 +6,17 @@ CREATE TABLE retweets (
     deleted_at TIMESTAMP,
 
     user_id UUID NOT NULL REFERENCES users(id),
-    tweet_id UUID NOT NULL REFERENCES tweets(id),
-    original_tweet_id UUID NOT NULL REFERENCES tweets(id),
-
-    -- Business rule: A user cannot retweet the same tweet more than once
-    CONSTRAINT unique_user_tweet_retweet UNIQUE (user_id, tweet_id),
-    
-    -- Business rule: Prevent users from retweeting their own tweets
-    -- This constraint ensures user_id != creator_id of the tweet being retweeted
-    -- Note: This will need to be enforced at application level since we can't 
-    -- reference tweets.creator_id directly in a table constraint
-    CHECK (tweet_id != original_tweet_id)
+    tweet_id UUID NOT NULL REFERENCES tweets(id)
 );
+
+-- Instead of a UNIQUE constraint, we use a partial unique index that only applies to non-deleted rows
+CREATE UNIQUE INDEX idx_user_tweet_retweet_unique ON retweets (user_id, tweet_id) WHERE deleted_at IS NULL;
 
 -- Index for finding all retweets by a user
 CREATE INDEX idx_retweets_user_id ON retweets (user_id) WHERE deleted_at IS NULL;
 
 -- Index for finding all retweets of a specific tweet (for counting retweets)
 CREATE INDEX idx_retweets_tweet_id ON retweets (tweet_id) WHERE deleted_at IS NULL;
-
--- Index for finding retweets of original tweets (analytics/tracking)
-CREATE INDEX idx_retweets_original_tweet_id ON retweets (original_tweet_id) WHERE deleted_at IS NULL;
 
 -- Composite index for user timeline queries (user's retweets ordered by creation date)
 CREATE INDEX idx_retweets_user_created_active ON retweets (user_id, created_at DESC) WHERE deleted_at IS NULL;

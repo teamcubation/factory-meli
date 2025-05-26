@@ -14,5 +14,4 @@ type Retweet struct {
 	DeletedAt       sql.NullTime
 	UserID          uuid.UUID
 	TweetID         uuid.UUID
-	OriginalTweetID uuid.UUID
 }

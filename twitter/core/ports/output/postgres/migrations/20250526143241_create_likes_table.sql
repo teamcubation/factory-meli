@@ -6,11 +6,11 @@ CREATE TABLE likes (
     deleted_at TIMESTAMP,
 
     user_id UUID NOT NULL REFERENCES users(id),
-    tweet_id UUID NOT NULL REFERENCES tweets(id),
-
-    -- Business rule: A user can only like the same tweet once
-    CONSTRAINT unique_user_tweet_like UNIQUE (user_id, tweet_id)
+    tweet_id UUID NOT NULL REFERENCES tweets(id)
 );
+
+-- Instead of a UNIQUE constraint, we use a partial unique index that only applies to non-deleted rows
+CREATE UNIQUE INDEX idx_user_tweet_like_unique ON likes (user_id, tweet_id) WHERE deleted_at IS NULL;
 
 -- Index for finding all likes by a user
 CREATE INDEX idx_likes_user_id ON likes (user_id) WHERE deleted_at IS NULL;
