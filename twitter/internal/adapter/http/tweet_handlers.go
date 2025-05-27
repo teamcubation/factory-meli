@@ -22,6 +22,7 @@ type Tweet struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	Post      string    `json:"post"`
 	CreatorID uuid.UUID `json:"creator_id"`
+	ParentID  uuid.UUID `json:"parent_id,omitempty"`
 }
 
 func (h TweetHandlers) GetTweetsByCreator(w http.ResponseWriter, r *http.Request) {

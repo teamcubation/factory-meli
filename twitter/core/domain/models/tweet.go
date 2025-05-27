@@ -14,4 +14,5 @@ type Tweet struct {
 	DeletedAt sql.NullTime
 	Post      string
 	CreatorID uuid.UUID
+	ParentID  uuid.NullUUID
 }

@@ -31,6 +31,16 @@ func (m *MockTweetRepository) Save(ctx context.Context, params postgres.TweetSav
 	return args.Get(0).(*models.Tweet), args.Error(1)
 }
 
+func (m *MockTweetRepository) SaveReply(ctx context.Context, params postgres.TweetSaveReplyParams) (*models.Tweet, error) {
+	args := m.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*models.Tweet), args.Error(1)
+}
+
 func (m *MockTweetRepository) FindByID(ctx context.Context, params postgres.TweetFindByIDParams) (*models.Tweet, error) {
 	args := m.Called(ctx, params)
 
@@ -42,6 +52,16 @@ func (m *MockTweetRepository) FindByID(ctx context.Context, params postgres.Twee
 }
 
 func (m *MockTweetRepository) FindAllTweetsByUserId(ctx context.Context, params postgres.TweetFindAllTweetsByUserId) ([]*models.Tweet, error) {
+	args := m.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).([]*models.Tweet), args.Error(1)
+}
+
+func (m *MockTweetRepository) FetchReplies(ctx context.Context, params postgres.TweetFetchRepliesParams) ([]*models.Tweet, error) {
 	args := m.Called(ctx, params)
 
 	if args.Get(0) == nil {

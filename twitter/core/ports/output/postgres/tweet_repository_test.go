@@ -104,6 +104,103 @@ func TestTweetSave_ForeignKeyViolation(t *testing.T) {
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
+func TestTweetSaveReply_Success(t *testing.T) {
+	t.Parallel()
+
+	db, mock, repo := setupMockDB(t, func(db *sql.DB) TweetRepository {
+		return NewPostgresTweetRepository(db)
+	})
+	defer db.Close()
+
+	// Test data
+	post := "This is a reply!"
+	creatorID := uuid.New()
+	parentID := uuid.New()
+	tweetID := uuid.New()
+	now := time.Now()
+
+	// Set up expectations for the SaveReply query
+	mock.ExpectQuery(`INSERT INTO tweets \(post, creator_id, parent_id\) VALUES \(\$1, \$2, \$3\) RETURNING id, created_at, updated_at, post, creator_id, parent_id;`).
+		WithArgs(post, creatorID, parentID).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "post", "creator_id", "parent_id"}).
+			AddRow(tweetID, now, now, post, creatorID, parentID))
+
+	// Execute the method
+	ctx := context.Background()
+	params := TweetSaveReplyParams{Post: post, CreatorID: creatorID, ParentID: parentID}
+	tweet, err := repo.SaveReply(ctx, params)
+
+	// Assertions
+	require.NoError(t, err)
+	assert.Equal(t, tweetID, tweet.ID)
+	assert.Equal(t, post, tweet.Post)
+	assert.Equal(t, creatorID, tweet.CreatorID)
+
+	require.True(t, tweet.ParentID.Valid, "ParentID should be valid for a reply")
+	assert.Equal(t, parentID, tweet.ParentID.UUID)
+
+	assert.WithinDuration(t, now, tweet.CreatedAt, time.Second)
+	assert.WithinDuration(t, now, tweet.UpdatedAt, time.Second)
+
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestTweetSaveReply_DatabaseError(t *testing.T) {
+	t.Parallel()
+
+	db, mock, repo := setupMockDB(t, func(db *sql.DB) TweetRepository {
+		return NewPostgresTweetRepository(db)
+	})
+	defer db.Close()
+
+	post := "Reply with error"
+	creatorID := uuid.New()
+	parentID := uuid.New()
+
+	// Set up expectation for database error
+	mock.ExpectQuery(`INSERT INTO tweets \(post, creator_id, parent_id\) VALUES \(\$1, \$2, \$3\) RETURNING id, created_at, updated_at, post, creator_id, parent_id;`).
+		WithArgs(post, creatorID, parentID).
+		WillReturnError(sql.ErrConnDone)
+
+	ctx := context.Background()
+	params := TweetSaveReplyParams{Post: post, CreatorID: creatorID, ParentID: parentID}
+	tweet, err := repo.SaveReply(ctx, params)
+
+	// Assertions
+	assert.Error(t, err)
+	assert.Nil(t, tweet)
+	assert.Equal(t, sql.ErrConnDone, err)
+
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestTweetSaveReply_ParentIDForeignKeyViolation(t *testing.T) {
+	t.Parallel()
+
+	db, mock, repo := setupMockDB(t, func(db *sql.DB) TweetRepository {
+		return NewPostgresTweetRepository(db)
+	})
+	defer db.Close()
+
+	post := "Reply to non-existent parent"
+	creatorID := uuid.New()
+	parentID := uuid.New() // Simulate a parent ID that doesn't exist
+
+	expectedErrorMsg := `pq: insert or update on table "tweets" violates foreign key constraint "tweets_parent_id_fkey"`
+	mock.ExpectQuery(`INSERT INTO tweets \(post, creator_id, parent_id\) VALUES \(\$1, \$2, \$3\) RETURNING id, created_at, updated_at, post, creator_id, parent_id;`).
+		WithArgs(post, creatorID, parentID).
+		WillReturnError(errors.New(expectedErrorMsg))
+
+	ctx := context.Background()
+	params := TweetSaveReplyParams{Post: post, CreatorID: creatorID, ParentID: parentID}
+	tweet, err := repo.SaveReply(ctx, params)
+
+	assert.Error(t, err)
+	assert.Nil(t, tweet)
+	assert.Contains(t, err.Error(), "violates foreign key constraint")
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
 func TestTweetFindByID_Success(t *testing.T) {
 	t.Parallel()
 
@@ -214,10 +311,10 @@ func TestTweetFindAllTweetsByUserId_Success(t *testing.T) {
 	tweetCreatedAt2 := now.Add(-10 * time.Minute)
 
 	expectedQuery := `
-        SELECT id, created_at, updated_at, post, creator_id
-            FROM tweets WHERE creator_id = \$1
-            ORDER BY created_at DESC LIMIT \$2 OFFSET \$3;
-    `
+		SELECT id, created_at, updated_at, post, creator_id
+			FROM tweets WHERE creator_id = \$1
+			ORDER BY created_at DESC LIMIT \$2 OFFSET \$3;
+	`
 
 	// Simulate two tweets for the user
 	mock.ExpectQuery(expectedQuery).
@@ -262,10 +359,10 @@ func TestTweetFindAllTweetsByUserId_NoTweetsFound(t *testing.T) {
 	creatorID := uuid.New()
 
 	expectedQuery := `
-        SELECT id, created_at, updated_at, post, creator_id
-            FROM tweets WHERE creator_id = \$1
-            ORDER BY created_at DESC LIMIT \$2 OFFSET \$3;
-    `
+		SELECT id, created_at, updated_at, post, creator_id
+			FROM tweets WHERE creator_id = \$1
+			ORDER BY created_at DESC LIMIT \$2 OFFSET \$3;
+	`
 
 	// Return no rows
 	mock.ExpectQuery(expectedQuery).
@@ -304,10 +401,10 @@ func TestTweetFindAllTweetsByUserId_WithLimitAndOffset(t *testing.T) {
 	tweetTime2 := now.Add(-3 * time.Minute)
 
 	expectedQuery := `
-        SELECT id, created_at, updated_at, post, creator_id
-            FROM tweets WHERE creator_id = \$1
-            ORDER BY created_at DESC LIMIT \$2 OFFSET \$3;
-    `
+		SELECT id, created_at, updated_at, post, creator_id
+			FROM tweets WHERE creator_id = \$1
+			ORDER BY created_at DESC LIMIT \$2 OFFSET \$3;
+	`
 
 	// The order should reflect `ORDER BY created_at DESC`.
 	mock.ExpectQuery(expectedQuery).
@@ -344,10 +441,10 @@ func TestTweetFindAllTweetsByUserId_DatabaseError(t *testing.T) {
 	creatorID := uuid.New()
 
 	expectedQuery := `
-        SELECT id, created_at, updated_at, post, creator_id
-            FROM tweets WHERE creator_id = \$1
-            ORDER BY created_at DESC LIMIT \$2 OFFSET \$3;
-    `
+		SELECT id, created_at, updated_at, post, creator_id
+			FROM tweets WHERE creator_id = \$1
+			ORDER BY created_at DESC LIMIT \$2 OFFSET \$3;
+	`
 
 	// Set up expectation for database error
 	mock.ExpectQuery(expectedQuery).
@@ -382,10 +479,10 @@ func TestTweetFindAllTweetsByUserId_ScanningError(t *testing.T) {
 	now := time.Now()
 
 	expectedQuery := `
-        SELECT id, created_at, updated_at, post, creator_id
-            FROM tweets WHERE creator_id = \$1
-            ORDER BY created_at DESC LIMIT \$2 OFFSET \$3;
-    `
+		SELECT id, created_at, updated_at, post, creator_id
+			FROM tweets WHERE creator_id = \$1
+			ORDER BY created_at DESC LIMIT \$2 OFFSET \$3;
+	`
 
 	// Provide a row with a type mismatch
 	mock.ExpectQuery(expectedQuery).
@@ -403,6 +500,271 @@ func TestTweetFindAllTweetsByUserId_ScanningError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, tweets)
+	assert.Contains(t, err.Error(), `Scan error on column index 0, name "id": Scan: invalid UUID length: 10`)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestTweetFetchReplies_Success(t *testing.T) {
+	t.Parallel()
+
+	db, mock, repo := setupMockDB(t, func(db *sql.DB) TweetRepository {
+		return NewPostgresTweetRepository(db)
+	})
+	defer db.Close()
+
+	// Test data
+	rootTweetID := uuid.New()
+	creatorID := uuid.New()
+	now := time.Now()
+
+	reply1ID := uuid.New()
+	reply2ID := uuid.New()
+	reply3ID := uuid.New()
+
+	expectedQuery := `
+        WITH RECURSIVE thread_tweets AS \(
+            -- Base case: get the root tweet
+            SELECT id, created_at, updated_at, post, creator_id, parent_id, 0 as depth
+            FROM tweets 
+            WHERE id = \$1 AND deleted_at IS NULL
+            
+            UNION ALL
+            
+            -- Recursive case: get all replies
+            SELECT t.id, t.created_at, t.updated_at, t.post, t.creator_id, t.parent_id, tt.depth \+ 1
+            FROM tweets t
+            INNER JOIN thread_tweets tt ON t.parent_id = tt.id
+            WHERE t.deleted_at IS NULL
+        \)
+        SELECT id, created_at, updated_at, post, creator_id, parent_id
+        FROM thread_tweets
+        ORDER BY created_at ASC;
+    `
+
+	// Simulate a thread: root -> reply1 -> reply3, and root -> reply2
+	mock.ExpectQuery(expectedQuery).
+		WithArgs(rootTweetID).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "post", "creator_id", "parent_id"}).
+			AddRow(rootTweetID, now.Add(-10*time.Minute), now, "Root tweet", creatorID, nil). // Pass nil for ParentID of root tweet
+			AddRow(reply1ID, now.Add(-8*time.Minute), now, "Reply 1 to root", creatorID, rootTweetID).
+			AddRow(reply2ID, now.Add(-7*time.Minute), now, "Reply 2 to root", creatorID, rootTweetID).
+			AddRow(reply3ID, now.Add(-6*time.Minute), now, "Reply 3 to reply 1", creatorID, reply1ID))
+
+	ctx := context.Background()
+	params := TweetFetchRepliesParams{RootTweetID: rootTweetID}
+	replies, err := repo.FetchReplies(ctx, params)
+
+	require.NoError(t, err)
+	require.Len(t, replies, 4)
+
+	// Assertions for the ROOT TWEET (replies[0])
+	assert.Equal(t, rootTweetID, replies[0].ID)
+	assert.False(t, replies[0].ParentID.Valid, "Root tweet's ParentID should not be valid (i.e., nil)")
+
+	// Assertions for REPLY 1 (replies[1])
+	assert.Equal(t, reply1ID, replies[1].ID)
+	require.True(t, replies[1].ParentID.Valid, "Reply 1's ParentID should be valid")
+	assert.Equal(t, rootTweetID, replies[1].ParentID.UUID)
+
+	// Assertions for REPLY 2 (replies[2])
+	assert.Equal(t, reply2ID, replies[2].ID)
+	require.True(t, replies[2].ParentID.Valid, "Reply 2's ParentID should be valid")
+	assert.Equal(t, rootTweetID, replies[2].ParentID.UUID)
+
+	// Assertions for REPLY 3 (replies[3])
+	assert.Equal(t, reply3ID, replies[3].ID)
+	require.True(t, replies[3].ParentID.Valid, "Reply 3's ParentID should be valid")
+	assert.Equal(t, reply1ID, replies[3].ParentID.UUID)
+
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestTweetFetchReplies_NoRepliesFound(t *testing.T) {
+	t.Parallel()
+
+	db, mock, repo := setupMockDB(t, func(db *sql.DB) TweetRepository {
+		return NewPostgresTweetRepository(db)
+	})
+	defer db.Close()
+
+	rootTweetID := uuid.New()
+	creatorID := uuid.New()
+	now := time.Now()
+
+	expectedQuery := `
+        WITH RECURSIVE thread_tweets AS \(
+            -- Base case: get the root tweet
+            SELECT id, created_at, updated_at, post, creator_id, parent_id, 0 as depth
+            FROM tweets 
+            WHERE id = \$1 AND deleted_at IS NULL
+            
+            UNION ALL
+            
+            -- Recursive case: get all replies
+            SELECT t.id, t.created_at, t.updated_at, t.post, t.creator_id, t.parent_id, tt.depth \+ 1
+            FROM tweets t
+            INNER JOIN thread_tweets tt ON t.parent_id = tt.id
+            WHERE t.deleted_at IS NULL
+        \)
+        SELECT id, created_at, updated_at, post, creator_id, parent_id
+        FROM thread_tweets
+        ORDER BY created_at ASC;
+    `
+
+	// Only return the root tweet, no replies
+	mock.ExpectQuery(expectedQuery).
+		WithArgs(rootTweetID).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "post", "creator_id", "parent_id"}).
+			AddRow(rootTweetID, now, now, "Root tweet", creatorID, nil)) // Pass nil for ParentID
+
+	ctx := context.Background()
+	params := TweetFetchRepliesParams{RootTweetID: rootTweetID}
+	replies, err := repo.FetchReplies(ctx, params)
+
+	require.NoError(t, err)
+	require.Len(t, replies, 1)
+
+	assert.Equal(t, rootTweetID, replies[0].ID)
+	assert.False(t, replies[0].ParentID.Valid, "Root tweet's ParentID should not be valid (nil)")
+
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestTweetFetchReplies_RootTweetNotFound(t *testing.T) {
+	t.Parallel()
+
+	db, mock, repo := setupMockDB(t, func(db *sql.DB) TweetRepository {
+		return NewPostgresTweetRepository(db)
+	})
+	defer db.Close()
+
+	rootTweetID := uuid.New()
+
+	expectedQuery := `
+		WITH RECURSIVE thread_tweets AS \(
+			-- Base case: get the root tweet
+			SELECT id, created_at, updated_at, post, creator_id, parent_id, 0 as depth
+			FROM tweets 
+			WHERE id = \$1 AND deleted_at IS NULL
+			
+			UNION ALL
+			
+			-- Recursive case: get all replies
+			SELECT t.id, t.created_at, t.updated_at, t.post, t.creator_id, t.parent_id, tt.depth \+ 1
+			FROM tweets t
+			INNER JOIN thread_tweets tt ON t.parent_id = tt.id
+			WHERE t.deleted_at IS NULL
+		\)
+		SELECT id, created_at, updated_at, post, creator_id, parent_id
+		FROM thread_tweets
+		ORDER BY created_at ASC;
+	`
+
+	// Return no rows for the initial query (root tweet not found)
+	mock.ExpectQuery(expectedQuery).
+		WithArgs(rootTweetID).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "post", "creator_id", "parent_id"}))
+
+	ctx := context.Background()
+	params := TweetFetchRepliesParams{RootTweetID: rootTweetID}
+	replies, err := repo.FetchReplies(ctx, params)
+
+	require.NoError(t, err)  // No error, just an empty slice
+	assert.Empty(t, replies) // Expected an empty slice if root tweet not found
+
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestTweetFetchReplies_DatabaseError(t *testing.T) {
+	t.Parallel()
+
+	db, mock, repo := setupMockDB(t, func(db *sql.DB) TweetRepository {
+		return NewPostgresTweetRepository(db)
+	})
+	defer db.Close()
+
+	rootTweetID := uuid.New()
+
+	expectedQuery := `
+		WITH RECURSIVE thread_tweets AS \(
+			-- Base case: get the root tweet
+			SELECT id, created_at, updated_at, post, creator_id, parent_id, 0 as depth
+			FROM tweets 
+			WHERE id = \$1 AND deleted_at IS NULL
+			
+			UNION ALL
+			
+			-- Recursive case: get all replies
+			SELECT t.id, t.created_at, t.updated_at, t.post, t.creator_id, t.parent_id, tt.depth \+ 1
+			FROM tweets t
+			INNER JOIN thread_tweets tt ON t.parent_id = tt.id
+			WHERE t.deleted_at IS NULL
+		\)
+		SELECT id, created_at, updated_at, post, creator_id, parent_id
+		FROM thread_tweets
+		ORDER BY created_at ASC;
+	`
+
+	// Simulate a database error during query execution
+	mock.ExpectQuery(expectedQuery).
+		WithArgs(rootTweetID).
+		WillReturnError(sql.ErrConnDone)
+
+	ctx := context.Background()
+	params := TweetFetchRepliesParams{RootTweetID: rootTweetID}
+	replies, err := repo.FetchReplies(ctx, params)
+
+	assert.Error(t, err)
+	assert.Nil(t, replies)
+	assert.Equal(t, sql.ErrConnDone, err)
+
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestTweetFetchReplies_ScanningError(t *testing.T) {
+	t.Parallel()
+
+	db, mock, repo := setupMockDB(t, func(db *sql.DB) TweetRepository {
+		return NewPostgresTweetRepository(db)
+	})
+	defer db.Close()
+
+	rootTweetID := uuid.New()
+	creatorID := uuid.New()
+	now := time.Now()
+
+	expectedQuery := `
+		WITH RECURSIVE thread_tweets AS \(
+			-- Base case: get the root tweet
+			SELECT id, created_at, updated_at, post, creator_id, parent_id, 0 as depth
+			FROM tweets 
+			WHERE id = \$1 AND deleted_at IS NULL
+			
+			UNION ALL
+			
+			-- Recursive case: get all replies
+			SELECT t.id, t.created_at, t.updated_at, t.post, t.creator_id, t.parent_id, tt.depth \+ 1
+			FROM tweets t
+			INNER JOIN thread_tweets tt ON t.parent_id = tt.id
+			WHERE t.deleted_at IS NULL
+		\)
+		SELECT id, created_at, updated_at, post, creator_id, parent_id
+		FROM thread_tweets
+		ORDER BY created_at ASC;
+	`
+
+	// Return a row with a type mismatch (e.g., non-UUID for ID)
+	mock.ExpectQuery(expectedQuery).
+		WithArgs(rootTweetID).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "post", "creator_id", "parent_id"}).
+			AddRow("not-a-uuid", now, now, "Invalid tweet", creatorID, nil))
+
+	ctx := context.Background()
+	params := TweetFetchRepliesParams{RootTweetID: rootTweetID}
+	replies, err := repo.FetchReplies(ctx, params)
+
+	assert.Error(t, err)
+	assert.Nil(t, replies)
 	assert.Contains(t, err.Error(), `Scan error on column index 0, name "id": Scan: invalid UUID length: 10`)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

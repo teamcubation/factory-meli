@@ -12,8 +12,10 @@ import (
 // TweetRepository defines the interface for tweet persistence operations
 type TweetRepository interface {
 	Save(ctx context.Context, params TweetSaveParams) (*models.Tweet, error)
+	SaveReply(ctx context.Context, params TweetSaveReplyParams) (*models.Tweet, error)
 	FindByID(ctx context.Context, params TweetFindByIDParams) (*models.Tweet, error)
 	FindAllTweetsByUserId(ctx context.Context, params TweetFindAllTweetsByUserId) ([]*models.Tweet, error)
+	FetchReplies(ctx context.Context, params TweetFetchRepliesParams) ([]*models.Tweet, error)
 }
 
 // PostgresTweetRepository implements TweetRepository interface with PostgreSQL
@@ -55,6 +57,43 @@ func (r *PostgresTweetRepository) Save(ctx context.Context, params TweetSavePara
 		slog.ErrorContext(ctx, "Error saving tweet to db", "error", err, "layer", "database")
 		return nil, err
 	}
+
+	return &tweet, nil
+}
+
+// SaveReply inserts a new reply tweet into the database
+type TweetSaveReplyParams struct {
+	Post      string    `json:"post"`
+	CreatorID uuid.UUID `json:"creator_id"`
+	ParentID  uuid.UUID `json:"parent_id"`
+}
+
+func (r *PostgresTweetRepository) SaveReply(ctx context.Context, params TweetSaveReplyParams) (*models.Tweet, error) {
+	slog.InfoContext(ctx, "Saving a new reply tweet to the database", "post", params.Post, "creator_id", params.CreatorID, "parent_id", params.ParentID, "layer", "database")
+	query := `INSERT INTO tweets (post, creator_id, parent_id) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at, post, creator_id, parent_id;`
+
+	var tweet models.Tweet
+	var parentID uuid.NullUUID // Use uuid.NullUUID for scanning
+	err := r.db.QueryRowContext(
+		ctx,
+		query,
+		params.Post,
+		params.CreatorID,
+		params.ParentID,
+	).Scan(
+		&tweet.ID,
+		&tweet.CreatedAt,
+		&tweet.UpdatedAt,
+		&tweet.Post,
+		&tweet.CreatorID,
+		&parentID, // Scan into the temporary uuid.NullUUID
+	)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error saving reply tweet to db", "error", err, "layer", "database")
+		return nil, err
+	}
+
+	tweet.ParentID = parentID // Assign the scanned nullable value to the tweet struct
 
 	return &tweet, nil
 }
@@ -119,6 +158,75 @@ func (r *PostgresTweetRepository) FindAllTweetsByUserId(ctx context.Context, par
 			slog.ErrorContext(ctx, "Error scanning tweet", "error", err, "id", t.ID, "layer", "database")
 			return nil, err
 		}
+		tweets = append(tweets, &t)
+	}
+
+	if err := rows.Close(); err != nil {
+		slog.ErrorContext(ctx, "Error closing rows", "error", err, "layer", "database")
+		return nil, err
+	}
+
+	if err := rows.Err(); err != nil {
+		slog.ErrorContext(ctx, "Error when iterating rows", "error", err, "layer", "database")
+		return nil, err
+	}
+
+	return tweets, nil
+}
+
+// FetchReplies retrieves all replies for a given root tweet ID in a flat structure
+type TweetFetchRepliesParams struct {
+	RootTweetID uuid.UUID `json:"root_tweet_id"`
+}
+
+func (r *PostgresTweetRepository) FetchReplies(ctx context.Context, params TweetFetchRepliesParams) ([]*models.Tweet, error) {
+	slog.InfoContext(ctx, "Fetching all replies for a root tweet", "root_tweet_id", params.RootTweetID, "layer", "database")
+
+	// This query uses a recursive CTE to fetch all replies in the thread
+	query := `
+        WITH RECURSIVE thread_tweets AS (
+            -- Base case: get the root tweet
+            SELECT id, created_at, updated_at, post, creator_id, parent_id, 0 as depth
+            FROM tweets 
+            WHERE id = $1 AND deleted_at IS NULL
+            
+            UNION ALL
+            
+            -- Recursive case: get all replies
+            SELECT t.id, t.created_at, t.updated_at, t.post, t.creator_id, t.parent_id, tt.depth + 1
+            FROM tweets t
+            INNER JOIN thread_tweets tt ON t.parent_id = tt.id
+            WHERE t.deleted_at IS NULL
+        )
+        SELECT id, created_at, updated_at, post, creator_id, parent_id
+        FROM thread_tweets
+        ORDER BY created_at ASC;
+    `
+
+	rows, err := r.db.QueryContext(ctx, query, params.RootTweetID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error querying db to fetch thread replies", "error", err, "root_tweet_id", params.RootTweetID, "layer", "database")
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tweets []*models.Tweet
+	for rows.Next() {
+		var t models.Tweet
+		var parentID uuid.NullUUID // Declare a temporary uuid.NullUUID for scanning
+
+		if err := rows.Scan(
+			&t.ID,
+			&t.CreatedAt,
+			&t.UpdatedAt,
+			&t.Post,
+			&t.CreatorID,
+			&parentID, // Scan into the temporary uuid.NullUUID
+		); err != nil {
+			slog.ErrorContext(ctx, "Error scanning thread tweet", "error", err, "layer", "database")
+			return nil, err
+		}
+		t.ParentID = parentID // Assign the scanned nullable value to the tweet struct
 		tweets = append(tweets, &t)
 	}
 
