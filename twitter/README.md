@@ -197,6 +197,38 @@ A API oferece os seguintes endpoints para gerenciar usuários, tweets e relacion
   - **Código**: 400 Bad Request - Se o conteúdo estiver vazio ou inválido
   - **Código**: 404 Not Found - Se o usuário não existir
 
+#### Criar uma resposta a um tweet
+- **URL**: `/tweets/{tweet_id}/reply`
+- **Método**: `POST`
+- **Parâmetros de URL**:
+  - `tweet_id`: ID do tweet a qual se está respondendo (UUID)
+- **Descrição**: Cria um novo tweet em resposta a outro já existente
+- **Corpo da requisição**:
+  ```json
+  {
+    "post": "string",
+    "creator_id": "uuid",
+  }
+  ```
+- **Resposta de sucesso**:
+  - **Código**: 201 Created
+  - **Conteúdo**:
+    ```json
+    {
+      "id": "uuid",
+      "created_at": "string",
+      "updated_at": "string",
+      "post": "string",
+      "creator_id": "uuid",
+      "parent_id": "uuid"
+    }
+    ```
+- **Respostas de erro**:
+  - **Código**: 400 Bad Request - Se o conteúdo estiver vazio ou inválido
+  - **Código**: 400 Bad Request - Se o id do usuário criador estiver em um formato inválido
+  - **Código**: 404 Not Found - Se o usuário não existir
+  - **Código**: 404 Not Found - Se o tweet original não existir
+
 #### Listar tweets de um usuário
 - **URL**: `/tweets/{creator_id}`
 - **Método**: `GET`
@@ -219,6 +251,31 @@ A API oferece os seguintes endpoints para gerenciar usuários, tweets e relacion
     ```
 - **Respostas de erro**:
   - **Código**: 404 Not Found - Se o usuário não existir
+
+#### Ver Thread
+- **URL**: `/tweets/{tweet_id}/thread`
+- **Método**: `GET`
+- **Parâmetros de URL**:
+  - `creator_id`: ID do tweet raiz, ou seja, o primeiro da thread
+- **Descrição**: Retorna todos os tweets que são respostas ao tweet com o id passado no parâmetro, incluindo ele mesmo
+- **Resposta de sucesso**:
+  - **Código**: 200 OK
+  - **Conteúdo**:
+    ```json
+    [
+      {
+        "id": "uuid",
+        "created_at": "string",
+        "updated_at": "string",
+        "post": "string",
+        "creator_id": "uuid",
+        "parent_id": "uuid"
+      }
+    ]
+    ```
+- **Respostas de erro**:
+  - **Código**: 400 Bad Request - Se a uuid do tweet não for válida
+  - **Código**: 404 Not Found - Se o tweet não existir
 
 ### Seguidores
 
