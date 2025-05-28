@@ -17,11 +17,11 @@ type TweetHandlers struct {
 
 // Internal tweet type to return json correctly
 type Tweet struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Post      string    `json:"post"`
-	CreatorID uuid.UUID `json:"creator_id"`
+	ID        uuid.UUID  `json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	Post      string     `json:"post"`
+	CreatorID uuid.UUID  `json:"creator_id"`
 	ParentID  *uuid.UUID `json:"parent_id,omitempty"`
 }
 
@@ -109,14 +109,14 @@ func modelTweetToTweet(tweet models.Tweet) Tweet {
 	if tweet.ParentID.Valid {
 		parentID = &tweet.ParentID.UUID
 	}
-	
+
 	return Tweet{
 		ID:        tweet.ID,
 		CreatedAt: tweet.CreatedAt,
 		UpdatedAt: tweet.UpdatedAt,
 		Post:      tweet.Post,
 		CreatorID: tweet.CreatorID,
-		ParentID: parentID,
+		ParentID:  parentID,
 	}
 }
 

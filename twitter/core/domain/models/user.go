@@ -13,6 +13,9 @@ type User struct {
 	UpdatedAt time.Time
 	DeletedAt sql.NullTime
 	Email     string
+	Name      string
+	Bio       string
+	AvatarURL string
 }
 
 type UserWithTweets struct {

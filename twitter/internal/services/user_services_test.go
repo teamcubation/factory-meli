@@ -61,6 +61,16 @@ func (m *MockUserRepository) GetTimeline(ctx context.Context, params postgres.Ti
 	return args.Get(0).([]*models.UserWithTweets), args.Error(1)
 }
 
+func (m *MockUserRepository) UpdateProfile(ctx context.Context, params postgres.UserUpdateProfileParams) (*models.User, error) {
+	args := m.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*models.User), args.Error(1)
+}
+
 // Test scenarios
 func TestCreateUser(t *testing.T) {
 	// Test cases

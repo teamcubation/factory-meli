@@ -381,7 +381,6 @@ func TestCreateTweet(t *testing.T) {
 	}
 }
 
-
 func TestReplyToTweet(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -424,46 +423,51 @@ func TestReplyToTweet(t *testing.T) {
 			expectedTweet:  &models.Tweet{}, // Content is checked for nil/not nil, specific fields are not asserted here.
 		},
 		{
-			name:           "Invalid request payload",
-			requestBody:    `{"post": 123, "creator_id": "%s"}`,
-			tweetID:        uuid.New().String(),
-			mockSetup:      func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, parentTweetID, creatorID uuid.UUID) {},
+			name:        "Invalid request payload",
+			requestBody: `{"post": 123, "creator_id": "%s"}`,
+			tweetID:     uuid.New().String(),
+			mockSetup: func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, parentTweetID, creatorID uuid.UUID) {
+			},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedTweet:  nil,
 		},
 		{
-			name:           "Empty post content",
-			requestBody:    `{"post": "", "creator_id": "%s"}`,
-			tweetID:        uuid.New().String(),
-			mockSetup:      func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, parentTweetID, creatorID uuid.UUID) {},
+			name:        "Empty post content",
+			requestBody: `{"post": "", "creator_id": "%s"}`,
+			tweetID:     uuid.New().String(),
+			mockSetup: func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, parentTweetID, creatorID uuid.UUID) {
+			},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedTweet:  nil,
 		},
 		{
-			name:           "Post content too long",
-			requestBody:    `{"post": "` + strings.Repeat("b", 281) + `", "creator_id": "%s"}`,
-			tweetID:        uuid.New().String(),
-			mockSetup:      func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, parentTweetID, creatorID uuid.UUID) {},
+			name:        "Post content too long",
+			requestBody: `{"post": "` + strings.Repeat("b", 281) + `", "creator_id": "%s"}`,
+			tweetID:     uuid.New().String(),
+			mockSetup: func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, parentTweetID, creatorID uuid.UUID) {
+			},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedTweet:  nil,
 		},
 		{
-			name:           "Invalid parent tweet ID",
-			requestBody:    `{"post": "Reply", "creator_id": "%s"}`,
-			tweetID:        "invalid-uuid",
-			mockSetup:      func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, parentTweetID, creatorID uuid.UUID) {},
+			name:        "Invalid parent tweet ID",
+			requestBody: `{"post": "Reply", "creator_id": "%s"}`,
+			tweetID:     "invalid-uuid",
+			mockSetup: func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, parentTweetID, creatorID uuid.UUID) {
+			},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedTweet:  nil,
 		},
 		{
-			name:           "Invalid creator ID in body",
-			requestBody:    `{"post": "Reply", "creator_id": "invalid-uuid"}`,
-			tweetID:        uuid.New().String(),
-			mockSetup:      func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, parentTweetID, creatorID uuid.UUID) {},
+			name:        "Invalid creator ID in body",
+			requestBody: `{"post": "Reply", "creator_id": "invalid-uuid"}`,
+			tweetID:     uuid.New().String(),
+			mockSetup: func(tweetRepo *MockTweetRepository, userRepo *MockUserRepository, parentTweetID, creatorID uuid.UUID) {
+			},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  true,
 			expectedTweet:  nil,

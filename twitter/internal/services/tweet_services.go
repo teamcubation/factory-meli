@@ -164,7 +164,7 @@ func (s TweetServiceImpl) ReplyToTweet(ctx context.Context, r *http.Request) (*m
 
 	// Parse request body
 	type parameters struct {
-		Post string `json:"post"`
+		Post      string `json:"post"`
 		CreatorID string `json:"creator_id"`
 	}
 
@@ -243,7 +243,6 @@ func (s TweetServiceImpl) ReplyToTweet(ctx context.Context, r *http.Request) (*m
 	slog.InfoContext(ctx, "Successfully created new reply tweet", "tweet_id", tweet.ID, "creator_id", creatorID, "parent_tweet_id", parentTweetID, "layer", "service")
 	return tweet, nil
 }
-
 
 // This service retrieves a complete thread of tweets, starting from a given root tweet ID.
 func (s TweetServiceImpl) GetTweetThread(ctx context.Context, r *http.Request) ([]*models.Tweet, error) {
