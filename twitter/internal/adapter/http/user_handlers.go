@@ -21,6 +21,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
+	AvatarURL string    `json:"avatar_url,omitempty"`
 }
 
 type UserWithTweets struct {
@@ -71,6 +72,7 @@ func modelUserToUser(user models.User) User {
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		Email:     user.Email,
+		AvatarURL: user.AvatarURL,
 	}
 }
 

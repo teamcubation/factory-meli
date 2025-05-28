@@ -109,7 +109,10 @@ A API oferece os seguintes endpoints para gerenciar usuários, tweets e relacion
 - **Corpo da requisição**:
   ```json
   {
-    "email": "string"
+    "email": "string",
+    "name": "string",
+    "bio": "string",
+    "avatar_url": "url", // Optional
   }
   ```
 - **Resposta de sucesso**:
@@ -121,6 +124,9 @@ A API oferece os seguintes endpoints para gerenciar usuários, tweets e relacion
       "created_at": "string",
       "updated_at": "string",
       "email": "string",
+      "name": "string",
+      "bio": "string",
+      "avatar_url": "url",
     }
     ```
 - **Respostas de erro**:

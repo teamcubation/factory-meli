@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -36,7 +37,10 @@ func (s UserServiceImpl) CreateUser(ctx context.Context, r *http.Request) (*mode
 
 	// Decoding body
 	type parameters struct {
-		Email string `json:"email"`
+		Email     string `json:"email"`
+		Name      string `json:"name"`
+		Bio       string `json:"bio"`
+		AvatarURL string `json:"avatar_url,omitempty"`
 	}
 
 	// Parse request body
@@ -62,6 +66,45 @@ func (s UserServiceImpl) CreateUser(ctx context.Context, r *http.Request) (*mode
 		return nil, ServiceError{http.StatusBadRequest, "invalid email format"}
 	}
 
+	// Validating profile fields
+	var name, bio, avatarURL string
+
+	// Validate name
+	trimmedName := strings.TrimSpace(params.Name)
+	if trimmedName == "" {
+		slog.ErrorContext(ctx, "Name is an obligatory field for CreateUser", "layer", "service")
+		return nil, ServiceError{http.StatusBadRequest, "name is an obligatory field"}
+	}
+	if len(trimmedName) > 100 {
+		slog.ErrorContext(ctx, "Name exceeds maximum length for CreateUser", "name_length", len(trimmedName), "layer", "service")
+		return nil, ServiceError{http.StatusBadRequest, "name must be 100 characters or less"}
+	}
+	name = trimmedName
+
+	// Validate bio
+	trimmedBio := strings.TrimSpace(params.Bio)
+	if trimmedBio == "" {
+		slog.ErrorContext(ctx, "Bio is an obligatory field for CreateUser", "layer", "service")
+		return nil, ServiceError{http.StatusBadRequest, "bio is an obligatory field"}
+	}
+	if len(trimmedBio) > 280 {
+		slog.ErrorContext(ctx, "Bio exceeds maximum length for CreateUser", "bio_length", len(trimmedBio), "layer", "service")
+		return nil, ServiceError{http.StatusBadRequest, "bio must be 280 characters or less"}
+	}
+	bio = trimmedBio
+
+	// Validate avatar URL
+	if params.AvatarURL != "" {
+		trimmedURL := strings.TrimSpace(params.AvatarURL)
+		if trimmedURL != "" {
+			if _, err := url.ParseRequestURI(trimmedURL); err != nil {
+				slog.ErrorContext(ctx, "Invalid avatar URL format for CreateUser", "avatar_url", trimmedURL, "error", err, "layer", "service")
+				return nil, ServiceError{http.StatusBadRequest, "invalid avatar URL format"}
+			}
+			avatarURL = trimmedURL
+		}
+	}
+
 	// Verifying if the user email already has an account associated to it
 	slog.InfoContext(ctx, "Verifying if user email already exists", "email", email, "layer", "service")
 	user, err := s.repository.FindByEmail(ctx, postgres.UserFindByEmailParams{
@@ -80,7 +123,10 @@ func (s UserServiceImpl) CreateUser(ctx context.Context, r *http.Request) (*mode
 	// Saving new user's info
 	slog.InfoContext(ctx, "Saving new user to the database", "email", email, "layer", "service")
 	user, err = s.repository.Save(ctx, postgres.UserSaveParams{
-		Email: email,
+		Email:     email,
+		Name:      name,
+		Bio:       bio,
+		AvatarURL: avatarURL,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error saving new user", "email", email, "error", err, "layer", "service")
@@ -90,6 +136,7 @@ func (s UserServiceImpl) CreateUser(ctx context.Context, r *http.Request) (*mode
 	slog.InfoContext(ctx, "Successfully created new user", "user_id", user.ID, "email", user.Email, "layer", "service")
 	return user, nil
 }
+
 
 func (s UserServiceImpl) GetUserTimeline(ctx context.Context, r *http.Request) ([]*models.UserWithTweets, error) {
 	slog.InfoContext(ctx, "Calling service to get user timeline", "layer", "service")
