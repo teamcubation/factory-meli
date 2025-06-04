@@ -1,7 +1,7 @@
 package domain
 
-type Risk struct {
+type Setting struct {
 	ID          int
 	Description string
-	Value       int
+	SheetID     int
 }
