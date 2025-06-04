@@ -3,16 +3,16 @@ package http
 import (
 	"net/http"
 
-	"hex-todo/core/ports"
+	portIn "hex-todo/internal/core/ports/in"
 
 	"github.com/gin-gonic/gin"
 )
 
 type TaskHandler struct {
-	Service ports.TaskService
+	Service portIn.TaskService
 }
 
-func NewRouter(service ports.TaskService) *gin.Engine {
+func NewRouter(service portIn.TaskService) *gin.Engine {
 	handler := &TaskHandler{Service: service}
 	router := gin.Default()
 

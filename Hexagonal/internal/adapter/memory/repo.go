@@ -1,24 +1,24 @@
 package memory
 
 import (
-	"hex-todo/core/model"
+	"hex-todo/internal/core/domain"
 )
 
 type InMemoryRepo struct {
-	tasks []*model.Task
+	tasks []*domain.Task
 }
 
 func NewInMemoryRepo() *InMemoryRepo {
 	return &InMemoryRepo{
-		tasks: make([]*model.Task, 0),
+		tasks: make([]*domain.Task, 0),
 	}
 }
 
-func (r *InMemoryRepo) Save(task *model.Task) error {
+func (r *InMemoryRepo) Save(task *domain.Task) error {
 	r.tasks = append(r.tasks, task)
 	return nil
 }
 
-func (r *InMemoryRepo) FindAll() ([]*model.Task, error) {
+func (r *InMemoryRepo) FindAll() ([]*domain.Task, error) {
 	return r.tasks, nil
 }

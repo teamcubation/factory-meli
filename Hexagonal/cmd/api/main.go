@@ -3,12 +3,12 @@ package main
 import (
 	"hex-todo/internal/adapter/http"
 	"hex-todo/internal/adapter/memory"
-	"hex-todo/internal/service"
+	"hex-todo/internal/application"
 )
 
 func main() {
 	repo := memory.NewInMemoryRepo()
-	svc := service.NewTaskService(repo)
+	svc := application.NewTaskService(repo)
 
 	router := http.NewRouter(svc)
 
