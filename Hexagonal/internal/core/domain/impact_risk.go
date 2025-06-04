@@ -1,8 +1,8 @@
 package domain
 
 type ImpactRisk struct {
-	ImpactID int
-	RiskID int
+	ImpactID    int
+	RiskID      int
 	Description string
-	Weight int
+	Weight      int
 }
