@@ -1,0 +1,9 @@
+# air folder
+tmp
+
+# production exe
+twitter
+
+# logs
+logs
+*.log
